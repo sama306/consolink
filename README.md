@@ -1,43 +1,93 @@
-# Astro Starter Kit: Minimal
+# Consolink
 
-```sh
-pnpm create astro@latest -- --template minimal
+Sistema de gestión de consorcios y edificios. Permite administrar expensas, tickets de reparaciones, avisos, documentos, calendario de eventos y la asignación de roles (propietarios, inquilinos, encargados y administradores).
+
+## Estructura del repositorio
+
 ```
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
 /
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+├── backend/                  # API REST (Express + Prisma + PostgreSQL)
+│   ├── prisma/
+│   │   ├── schema.prisma     # Modelo de datos
+│   │   └── seed.ts           # Datos de ejemplo
+│   ├── src/
+│   │   ├── config/           # Env + Prisma client
+│   │   ├── middlewares/      # auth, authorize, validate, error
+│   │   ├── modules/          # 14 módulos (auth, users, tickets, etc.)
+│   │   └── types/            # TypeScript declarations
+│   └── package.json
+│
+├── frontend/consolink/       # Frontend SSR (Astro + React)
+│   ├── src/
+│   │   ├── components/       # Islas de React (shadcn/ui)
+│   │   ├── lib/              # requireAuth, utils
+│   │   ├── pages/            # Rutas de Astro
+│   │   ├── styles/           # Tailwind + shadcn
+│   │   └── middleware.ts     # Proxy de autenticación (cookie → backend)
+│   └── package.json
+│
+└── docs/                     # Documentación del proyecto
+    ├── ERD.md                # Modelo entidad-relación
+    ├── ARQUITECTURA.md       # Diagrama de conexión backend/frontend
+    ├── API.md                # Endpoints REST
+    └── DECISIONES.md         # Registro de decisiones técnicas
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Requisitos previos
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- **Node.js** >= 22.12.0
+- **pnpm** >= 9.x (npm y yarn no están soportados)
+- **PostgreSQL** >= 15
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Instalación y arranque
 
-## 🧞 Commands
+### 1. Backend
 
-All commands are run from the root of the project, from a terminal:
+```bash
+cd backend
+cp .env.example .env      # Editar DATABASE_URL, JWT_SECRET, etc.
+pnpm install
+pnpm prisma migrate dev   # Aplica migraciones
+pnpm prisma db seed       # Carga datos de ejemplo (opcional)
+pnpm dev                  # Inicia en http://localhost:3001
+```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+### 2. Frontend
 
-## 👀 Want to learn more?
+```bash
+cd frontend/consolink
+# Crear .env (no existe .env.example, referencia abajo)
+pnpm install
+pnpm dev                  # Inicia en http://localhost:4321
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+> El backend debe estar corriendo antes que el frontend, ya que el middleware de Astro consulta `GET /api/auth/me` al iniciar cada request.
+
+## Variables de entorno
+
+### Backend (`backend/.env`)
+
+| Variable | Descripción | Obligatoria | Default |
+|----------|-------------|-------------|---------|
+| `DATABASE_URL` | Cadena de conexión a PostgreSQL | Sí | — |
+| `JWT_SECRET` | Clave secreta para firmar tokens JWT | Sí | — |
+| `PORT` | Puerto del servidor Express | No | `3001` |
+| `FRONTEND_URL` | Origen del frontend (para CORS) | No | `http://localhost:4321` |
+| `NODE_ENV` | Entorno (`development` / `production`) | No | — |
+
+### Frontend (`frontend/consolink/.env`)
+
+| Variable | Descripción | Obligatoria | Default |
+|----------|-------------|-------------|---------|
+| `PUBLIC_API_URL` | URL base de la API del backend | Sí | `http://localhost:3001/api` |
+
+> **Atención:** El frontend **no** tiene archivo `.env.example`. Crear `.env` manualmente con `PUBLIC_API_URL=http://localhost:3001/api`.
+
+## Documentación detallada
+
+Ver [`/docs/`](./docs/) para documentación completa del proyecto:
+
+- [`docs/ERD.md`](./docs/ERD.md) — Modelo entidad-relación
+- [`docs/ARQUITECTURA.md`](./docs/ARQUITECTURA.md) — Arquitectura y flujo de auth
+- [`docs/API.md`](./docs/API.md) — Endpoints REST
+- [`docs/DECISIONES.md`](./docs/DECISIONES.md) — Decisiones de diseño
