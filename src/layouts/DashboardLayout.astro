@@ -1,0 +1,137 @@
+---
+import "@/styles/global.css"
+import type { User } from "@/middleware"
+import {
+  Building2,
+  Warehouse,
+  DoorOpen,
+  UserCheck,
+  Users,
+  Ticket,
+  FileText,
+  DollarSign,
+  Megaphone,
+  UserCog,
+  Home,
+  Receipt,
+  HelpCircle,
+  ClipboardList,
+  LogOut,
+  type LucideIcon,
+} from "lucide-react"
+
+export type Props = {
+  user: User
+}
+
+const { user } = Astro.props
+
+type NavItem = {
+  label: string
+  href: string
+  icon: LucideIcon
+}
+
+const rolesNavMap: Record<string, NavItem[]> = {
+  ADMIN: [
+    { label: "Consorcios", href: "/dashboard/consorcios", icon: Building2 },
+    { label: "Edificios", href: "/dashboard/edificios", icon: Warehouse },
+    { label: "Departamentos", href: "/dashboard/departamentos", icon: DoorOpen },
+    { label: "Propietarios", href: "/dashboard/propietarios", icon: UserCheck },
+    { label: "Inquilinos", href: "/dashboard/inquilinos", icon: Users },
+    { label: "Tickets", href: "/dashboard/tickets", icon: Ticket },
+    { label: "Documentos", href: "/dashboard/documentos", icon: FileText },
+    { label: "Expensas", href: "/dashboard/expensas", icon: DollarSign },
+    { label: "Avisos", href: "/dashboard/avisos", icon: Megaphone },
+    { label: "Usuarios", href: "/dashboard/usuarios", icon: UserCog },
+  ],
+  OWNER: [
+    { label: "Mis Propiedades", href: "/dashboard/propiedades", icon: Home },
+    { label: "Mis Expensas", href: "/dashboard/expensas", icon: Receipt },
+    { label: "Mis Consultas", href: "/dashboard/consultas", icon: HelpCircle },
+    { label: "Documentos", href: "/dashboard/documentos", icon: FileText },
+    { label: "Avisos", href: "/dashboard/avisos", icon: Megaphone },
+  ],
+  TENANT: [
+    { label: "Mi Unidad", href: "/dashboard/unidad", icon: DoorOpen },
+    { label: "Mis Consultas", href: "/dashboard/consultas", icon: HelpCircle },
+    { label: "Documentos", href: "/dashboard/documentos", icon: FileText },
+    { label: "Avisos", href: "/dashboard/avisos", icon: Megaphone },
+  ],
+  MANAGER: [
+    { label: "Tickets Asignados", href: "/dashboard/tickets", icon: ClipboardList },
+    { label: "Tareas Pendientes", href: "/dashboard/tareas", icon: ClipboardList },
+  ],
+}
+
+const seen = new Set<string>()
+const navItems: NavItem[] = []
+
+for (const role of user.roles) {
+  const items = rolesNavMap[role]
+  if (!items) continue
+  for (const item of items) {
+    if (!seen.has(item.label)) {
+      seen.add(item.label)
+      navItems.push(item)
+    }
+  }
+}
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Consolink</title>
+  </head>
+  <body class="flex min-h-dvh">
+    <aside class="flex w-60 flex-col border-r bg-sidebar">
+      <div class="flex h-14 items-center gap-2 border-b px-4">
+        <div class="size-7 rounded-lg bg-primary flex items-center justify-center">
+          <span class="text-sm font-bold text-primary-foreground">C</span>
+        </div>
+        <span class="text-sm font-semibold">Consolink</span>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-2 space-y-0.5">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <item.icon size={16} />
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      <div class="border-t p-3 space-y-2">
+        <div class="px-1 text-xs text-sidebar-foreground/60 truncate">
+          {user.email}
+        </div>
+        <div class="flex flex-wrap gap-1">
+          {user.roles.map((role) => (
+            <span class="rounded-md bg-sidebar-accent px-2 py-0.5 text-[11px] font-medium text-sidebar-accent-foreground">
+              {role}
+            </span>
+          ))}
+        </div>
+        <form action="/api/logout" method="POST">
+          <button
+            type="submit"
+            class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <LogOut size={16} />
+            Cerrar sesión
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-6">
+      <slot />
+    </main>
+  </body>
+</html>

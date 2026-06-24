@@ -1,0 +1,14 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro"
+import LoginForm from "@/components/auth/LoginForm"
+const user = Astro.locals.user
+if (user) {
+  return Astro.redirect("/dashboard")
+}
+---
+
+<AuthLayout>
+  <div class="w-full max-w-sm rounded-xl border bg-background p-6 shadow-sm">
+    <LoginForm client:load />
+  </div>
+</AuthLayout>

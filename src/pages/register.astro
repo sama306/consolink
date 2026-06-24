@@ -1,0 +1,15 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro"
+import RegisterForm from "@/components/auth/RegisterForm"
+
+const user = Astro.locals.user
+if (user) {
+  return Astro.redirect("/dashboard")
+}
+---
+
+<AuthLayout>
+  <div class="w-full max-w-sm rounded-xl border bg-background p-6 shadow-sm">
+    <RegisterForm client:load />
+  </div>
+</AuthLayout>
