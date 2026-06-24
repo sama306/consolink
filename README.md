@@ -17,20 +17,20 @@ Sistema de gestión de consorcios y edificios. Permite administrar expensas, tic
 │   │   └── types/            # TypeScript declarations
 │   └── package.json
 │
-├── frontend/consolink/       # Frontend SSR (Astro + React)
-│   ├── src/
-│   │   ├── components/       # Islas de React (shadcn/ui)
-│   │   ├── lib/              # requireAuth, utils
-│   │   ├── pages/            # Rutas de Astro
-│   │   ├── styles/           # Tailwind + shadcn
-│   │   └── middleware.ts     # Proxy de autenticación (cookie → backend)
-│   └── package.json
-│
-└── docs/                     # Documentación del proyecto
-    ├── ERD.md                # Modelo entidad-relación
-    ├── ARQUITECTURA.md       # Diagrama de conexión backend/frontend
-    ├── API.md                # Endpoints REST
-    └── DECISIONES.md         # Registro de decisiones técnicas
+└── frontend/
+    └── consolink/            # Frontend SSR (Astro + React)
+        ├── docs/             # Documentación del proyecto
+        │   ├── ERD.md
+        │   ├── ARQUITECTURA.md
+        │   ├── API.md
+        │   └── DECISIONES.md
+        ├── src/
+        │   ├── components/   # Islas de React (shadcn/ui)
+        │   ├── lib/          # requireAuth, utils
+        │   ├── pages/        # Rutas de Astro
+        │   ├── styles/       # Tailwind + shadcn
+        │   └── middleware.ts # Proxy de autenticación (cookie → backend)
+        └── package.json
 ```
 
 ## Requisitos previos
@@ -64,6 +64,8 @@ pnpm dev                  # Inicia en http://localhost:4321
 > El backend debe estar corriendo antes que el frontend, ya que el middleware de Astro consulta `GET /api/auth/me` al iniciar cada request.
 
 ## Variables de entorno
+
+> Este README está dentro de `frontend/consolink/`. Los paths relativos asumen esa ubicación.
 
 ### Backend (`backend/.env`)
 

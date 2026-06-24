@@ -15,7 +15,7 @@ Instrucciones para agentes de código (IA) que trabajen en este proyecto.
 
 - `backend/` — API REST (Express + Prisma). Proyecto independiente con su propio `package.json`, TypeScript y dependencias.
 - `frontend/consolink/` — Frontend SSR (Astro + React). Proyecto independiente con su propio `package.json`, TypeScript y dependencias.
-- `docs/` — Documentación del proyecto en Markdown.
+- `docs/` — Documentación del proyecto en Markdown (dentro de `frontend/consolink/`).
 - No hay un monorepo unificado; cada proyecto se ejecuta por separado.
 
 ---
@@ -75,7 +75,7 @@ Cada módulo en `src/modules/<nombre>/` tiene:
 
 ## Documentación
 
-- **Al agregar un endpoint nuevo**, actualizar `docs/API.md` reflejando método, ruta, body, roles y respuesta.
+- **Al agregar un endpoint nuevo**, actualizar `docs/API.md` (en `frontend/consolink/docs/API.md`) reflejando método, ruta, body, roles y respuesta.
 - **Al modificar el schema de Prisma**, asegurarse de que `docs/ERD.md` refleje los cambios.
 - **Decisiones técnicas importantes** deben registrarse en `docs/DECISIONES.md`.
 
