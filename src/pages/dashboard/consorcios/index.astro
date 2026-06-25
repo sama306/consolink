@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro"
+import { requireAuth } from "@/lib/requireAuth"
+import ConsortiumsPageRoot from "@/components/consortiums/ConsortiumsPageRoot"
+
+const _user = requireAuth(Astro)
+if (_user instanceof Response) return _user
+const user = _user
+---
+
+<DashboardLayout user={user}>
+  <ConsortiumsPageRoot client:load />
+</DashboardLayout>

@@ -3,7 +3,7 @@ import { defineMiddleware } from "astro:middleware";
 const API_URL = process.env.PUBLIC_API_URL ?? "http://localhost:3001/api";
 
 export type User = {
-  id: number;
+  id: string;
   email: string;
   roles: string[];
 };
@@ -29,7 +29,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     const body = await res.json();
-    context.locals.user = body as User;
+
+    const apiUser = body.data;
+
+    context.locals.user = {
+      id: apiUser.id,
+      email: apiUser.email,
+      roles: (apiUser.userRoles ?? []).map((ur: any) => ur.role.name),
+    };
   } catch {
     context.locals.user = undefined;
   }

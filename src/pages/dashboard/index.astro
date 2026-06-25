@@ -1,0 +1,70 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro"
+import { requireAuth } from "@/lib/requireAuth"
+import { serverFetch } from "@/lib/api-client"
+
+const _user = requireAuth(Astro)
+if (_user instanceof Response) return _user
+const user = _user
+
+const primaryRole = (user.roles ?? [])[0] ?? "ADMIN"
+
+const token = Astro.cookies.get("auth_token")?.value
+const roles = user.roles ?? []
+
+type Stat = { label: string; value: string | number }
+
+let stats: Stat[] = []
+
+if (roles.includes("ADMIN")) {
+  const [consortiums, users] = await Promise.all([
+    serverFetch<any[]>("/consortiums", token),
+    serverFetch<any[]>("/users", token),
+  ])
+  stats = [
+    { label: "Consorcios", value: consortiums?.length ?? "-" },
+    { label: "Usuarios", value: users?.length ?? "-" },
+  ]
+} else if (roles.includes("OWNER")) {
+  const expenses = await serverFetch<any[]>("/expenses", token)
+  stats = [
+    { label: "Expensas pendientes", value: expenses?.filter((e: any) => e.status === "PENDING")?.length ?? "-" },
+  ]
+} else if (roles.includes("TENANT")) {
+  stats = [{ label: "Mi Unidad", value: "Activo" }]
+} else if (roles.includes("MANAGER")) {
+  const tickets = await serverFetch<any[]>("/tickets", token)
+  stats = [
+    { label: "Tickets abiertos", value: tickets?.filter((t: any) => t.status === "OPEN")?.length ?? "-" },
+  ]
+}
+---
+
+<DashboardLayout user={user}>
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-2xl font-semibold">
+        Bienvenido{user.roles.includes("ADMIN") ? "" : " a tu panel"}
+      </h1>
+      <p class="text-sm text-muted-foreground mt-1">
+        Rol principal: <span class="font-medium">{primaryRole}</span>
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {stats.length > 0
+        ? stats.map((s) => (
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+              <p class="text-xs text-muted-foreground">{s.label}</p>
+              <p class="mt-1 text-2xl font-semibold">{s.value}</p>
+            </div>
+          ))
+        : roles.map((role) => (
+            <div class="rounded-xl border bg-card p-4 shadow-sm">
+              <p class="text-xs text-muted-foreground">Rol</p>
+              <p class="mt-1 text-2xl font-semibold">{role}</p>
+            </div>
+          ))}
+    </div>
+  </div>
+</DashboardLayout>
