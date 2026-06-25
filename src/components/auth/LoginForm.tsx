@@ -122,12 +122,6 @@ export default function LoginForm() {
         {isSubmitting ? "Ingresando…" : "Ingresar"}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
-        ¿No tenés cuenta?{" "}
-        <a href="/register" className="text-primary underline-offset-4 hover:underline">
-          Registrate
-        </a>
-      </p>
     </form>
   )
 }
