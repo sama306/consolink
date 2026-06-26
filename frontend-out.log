@@ -1,0 +1,18 @@
+[2m23:44:52[22m [34m[@astrojs/node][39m Enabling sessions with filesystem storage
+[2m23:44:52[22m [34m[vite][39m connected.
+[2m23:44:55[22m [34m[types][39m Generated [2m2ms[22m
+[2m23:44:55[22m [34m[vite][39m connected.
+[42m[1m astro [22m[49m [32mv7.0.2[39m [2mready in[22m 3841 [2mms[22m
+[2m┃[22m Local    [36mhttp://localhost:4321/[39m
+[2m┃[22m Network  [2muse --host to expose[22m
+[2m23:44:55[22m [32mwatching for file changes...[39m
+[2m23:44:58[22m [34m[200][39m /dashboard/edificios [2m377ms[22m
+[2m23:44:59[22m [34m[200][39m /dashboard/edificios [2m68ms[22m
+[2m23:45:23[22m [34m[200][39m / [2m7ms[22m
+[2m23:45:23[22m [33m[302][39m /dashboard/propietarios [2m54ms[22m
+[2m23:45:23[22m [34m[200][39m /login [2m60ms[22m
+[2m23:45:23[22m [33m[302][39m /dashboard/inquilinos [2m22ms[22m
+[2m23:45:23[22m [34m[200][39m /login [2m3ms[22m
+[2m23:45:23[22m [33m[302][39m /dashboard/encargados [2m23ms[22m
+[2m23:45:23[22m [34m[200][39m /login [2m4ms[22m
+[ELIFECYCLE] Command failed with exit code 4294967295.

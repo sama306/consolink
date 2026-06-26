@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro"
+import { requireRole } from "@/lib/requireAuth"
+import TenantsPageRoot from "@/components/tenants/TenantsPageRoot"
+
+const _user = requireRole(Astro, ["ADMIN"])
+if (_user instanceof Response) return _user
+const user = _user
+---
+
+<DashboardLayout user={user}>
+  <TenantsPageRoot client:load />
+</DashboardLayout>
