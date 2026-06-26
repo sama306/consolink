@@ -87,6 +87,9 @@ export default function OwnerFormDialog({ open, onOpenChange, owner }: Props) {
           taxId: data.taxId || null,
           notes: data.notes || null,
         }
+        if (data.password) {
+          payload.password = data.password
+        }
         await updateOwnerMutation.mutateAsync(payload)
       } else {
         if (!data.password) {
@@ -98,6 +101,7 @@ export default function OwnerFormDialog({ open, onOpenChange, owner }: Props) {
           password: data.password ?? "",
           firstName: data.firstName,
           lastName: data.lastName,
+          roleName: "OWNER",
           phone: data.phone || undefined,
         })
         const userId = (userRes as { data: { id: string } }).data.id

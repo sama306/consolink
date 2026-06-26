@@ -93,6 +93,9 @@ export default function TenantFormDialog({ open, onOpenChange, tenant }: Props) 
           depositAmount: data.depositAmount ? Number(data.depositAmount) : null,
           notes: data.notes || null,
         }
+        if (data.password) {
+          payload.password = data.password
+        }
         await updateTenantMutation.mutateAsync(payload)
       } else {
         if (!data.password) {
@@ -104,6 +107,7 @@ export default function TenantFormDialog({ open, onOpenChange, tenant }: Props) 
           password: data.password ?? "",
           firstName: data.firstName,
           lastName: data.lastName,
+          roleName: "TENANT",
           phone: data.phone || undefined,
         })
         const userId = (userRes as { data: { id: string } }).data.id

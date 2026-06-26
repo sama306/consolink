@@ -92,6 +92,9 @@ export default function ManagerFormDialog({ open, onOpenChange, manager }: Props
           isSupervisor: data.isSupervisor,
           notes: data.notes || null,
         }
+        if (data.password) {
+          payload.password = data.password
+        }
         await updateManagerMutation.mutateAsync(payload)
       } else {
         if (!data.password) {
@@ -103,6 +106,7 @@ export default function ManagerFormDialog({ open, onOpenChange, manager }: Props
           password: data.password ?? "",
           firstName: data.firstName,
           lastName: data.lastName,
+          roleName: "MANAGER",
           phone: data.phone || undefined,
         })
         const userId = (userRes as { data: { id: string } }).data.id

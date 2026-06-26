@@ -126,6 +126,7 @@ export function useCreateUser() {
       firstName: string
       lastName: string
       phone?: string
+      roleName: string
     }) => post<ApiItemResponse<{ id: string }>>("/users", data),
   })
 }
