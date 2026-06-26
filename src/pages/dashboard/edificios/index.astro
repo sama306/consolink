@@ -1,7 +1,7 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro"
 import { requireRole } from "@/lib/requireAuth"
-import ConsortiumsPageRoot from "@/components/consortiums/ConsortiumsPageRoot"
+import BuildingsPageRoot from "@/components/buildings/BuildingsPageRoot"
 
 const _user = requireRole(Astro, ["ADMIN"])
 if (_user instanceof Response) return _user
@@ -9,5 +9,5 @@ const user = _user
 ---
 
 <DashboardLayout user={user}>
-  <ConsortiumsPageRoot client:load />
+  <BuildingsPageRoot client:load />
 </DashboardLayout>
