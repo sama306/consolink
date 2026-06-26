@@ -72,8 +72,8 @@ Todas las rutas requieren autenticación (sin restricción de roles explícita e
 
 | Método | Ruta | Roles | Body | Respuesta |
 |--------|------|-------|------|-----------|
-| GET | `/api/apartments` | ADMIN, MANAGER, OWNER | Query: `page?`, `limit?`, `buildingId?` | Lista paginada |
-| GET | `/api/apartments/:id` | ADMIN, MANAGER, OWNER | — | Departamento por ID |
+| GET | `/api/apartments` | ADMIN, MANAGER, OWNER, TENANT | Query: `page?`, `limit?`, `buildingId?` | Lista paginada |
+| GET | `/api/apartments/:id` | ADMIN, MANAGER, OWNER, TENANT | — | Departamento por ID |
 | POST | `/api/apartments` | ADMIN, MANAGER | `{ buildingId, unitNumber, floor?, ..., ownerId, tenantId? }` | Creado |
 | PUT | `/api/apartments/:id` | ADMIN, MANAGER | `{ unitNumber?, floor?, ... }` | Actualizado |
 | DELETE | `/api/apartments/:id` | ADMIN | — | Soft delete |

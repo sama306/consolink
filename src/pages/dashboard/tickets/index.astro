@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro"
+import { requireRole } from "@/lib/requireAuth"
+import TicketsPageRoot from "@/components/tickets/TicketsPageRoot"
+
+const _user = requireRole(Astro, ["ADMIN", "MANAGER", "OWNER", "TENANT"])
+if (_user instanceof Response) return _user
+const user = _user
+---
+
+<DashboardLayout user={user}>
+  <TicketsPageRoot client:load userRoles={user.roles} />
+</DashboardLayout>
