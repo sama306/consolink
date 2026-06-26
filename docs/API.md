@@ -84,7 +84,7 @@ Todas las rutas requieren autenticación (sin restricción de roles explícita e
 
 | Método | Ruta | Roles | Body | Respuesta |
 |--------|------|-------|------|-----------|
-| GET | `/api/owners` | ADMIN, MANAGER | Query: `page?`, `limit?` | Lista paginada |
+| GET | `/api/owners` | ADMIN, MANAGER | Query: `page?`, `limit?`, `search?` (busca en nombre, email, DNI) | Lista paginada |
 | GET | `/api/owners/:id` | ADMIN, MANAGER, OWNER | — | Owner por ID |
 | GET | `/api/owners/:id/apartments` | ADMIN, MANAGER, OWNER | — | Departamentos del owner |
 | POST | `/api/owners` | ADMIN | `{ userId, dni, taxId?, bankInfo?, notes? }` | Creado |
@@ -97,7 +97,7 @@ Todas las rutas requieren autenticación (sin restricción de roles explícita e
 
 | Método | Ruta | Roles | Body | Respuesta |
 |--------|------|-------|------|-----------|
-| GET | `/api/tenants` | ADMIN, MANAGER | Query: `page?`, `limit?` | Lista paginada |
+| GET | `/api/tenants` | ADMIN, MANAGER | Query: `page?`, `limit?`, `search?` (busca en nombre, email) | Lista paginada |
 | GET | `/api/tenants/:id` | ADMIN, MANAGER, OWNER, TENANT | — | Tenant por ID |
 | GET | `/api/tenants/:id/contract-status` | ADMIN, MANAGER, OWNER, TENANT | — | Estado del contrato |
 | POST | `/api/tenants` | ADMIN | `{ userId, leaseStart?, leaseEnd?, depositAmount?, notes? }` | Creado |
@@ -110,7 +110,7 @@ Todas las rutas requieren autenticación (sin restricción de roles explícita e
 
 | Método | Ruta | Roles | Body | Respuesta |
 |--------|------|-------|------|-----------|
-| GET | `/api/managers` | ADMIN | Query: `page?`, `limit?` | Lista paginada |
+| GET | `/api/managers` | ADMIN | Query: `page?`, `limit?`, `search?` (busca en nombre, email) | Lista paginada |
 | GET | `/api/managers/:id` | ADMIN, MANAGER | — | Manager por ID |
 | POST | `/api/managers` | ADMIN | `{ userId, title?, isSupervisor?, notes? }` | Creado |
 | PUT | `/api/managers/:id` | ADMIN | `{ title?, isSupervisor?, notes? }` | Actualizado |
