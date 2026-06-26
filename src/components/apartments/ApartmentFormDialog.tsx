@@ -53,7 +53,7 @@ type Props = {
 export default function ApartmentFormDialog({ open, onOpenChange, apartment, buildingId }: Props) {
   const createMutation = useCreateApartment()
   const updateMutation = useUpdateApartment(apartment?.id ?? "")
-  const { data: buildingsData } = useBuildings({ limit: 200 })
+  const { data: buildingsData } = useBuildings({ limit: 100 })
   const [serverError, setServerError] = useState<string | null>(null)
 
   const isEdit = !!apartment
@@ -109,12 +109,12 @@ export default function ApartmentFormDialog({ open, onOpenChange, apartment, bui
     setServerError(null)
     const payload: Record<string, unknown> = {
       ...data,
-      floor: data.floor ? Number(data.floor) : undefined,
-      bedrooms: data.bedrooms ? Number(data.bedrooms) : undefined,
-      bathrooms: data.bathrooms ? Number(data.bathrooms) : undefined,
-      areaM2: data.areaM2 ? Number(data.areaM2) : undefined,
-      parkingSpots: data.parkingSpots ? Number(data.parkingSpots) : undefined,
-      storageUnits: data.storageUnits ? Number(data.storageUnits) : undefined,
+      floor: data.floor === "" ? undefined : Number(data.floor),
+      bedrooms: data.bedrooms === "" ? undefined : Number(data.bedrooms),
+      bathrooms: data.bathrooms === "" ? undefined : Number(data.bathrooms),
+      areaM2: data.areaM2 === "" ? undefined : Number(data.areaM2),
+      parkingSpots: data.parkingSpots === "" ? undefined : Number(data.parkingSpots),
+      storageUnits: data.storageUnits === "" ? undefined : Number(data.storageUnits),
       status: data.status || undefined,
       tenantId: data.tenantId || null,
     }
@@ -133,7 +133,14 @@ export default function ApartmentFormDialog({ open, onOpenChange, apartment, bui
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent
+        className="sm:max-w-lg"
+        onPointerDownOutside={(e) => {
+          const originalEvent = (e as CustomEvent).detail as { originalEvent?: PointerEvent } | undefined
+          const target = originalEvent?.originalEvent?.target as HTMLElement | null
+          if (target?.closest('[data-slot="select-content"]')) e.preventDefault()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{isEdit ? "Editar departamento" : "Nuevo departamento"}</DialogTitle>
           <DialogDescription>

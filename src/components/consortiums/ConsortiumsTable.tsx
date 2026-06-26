@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useConsortiums, useDeleteConsortium, type Consortium } from "@/hooks/useConsortiums"
+import { useDebounce } from "@/lib/use-debounce"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -29,14 +30,16 @@ export default function ConsortiumsTable() {
   const [page, setPage] = useState(1)
   const [cityFilter, setCityFilter] = useState("")
   const [provinceFilter, setProvinceFilter] = useState("")
+  const debouncedCity = useDebounce(cityFilter, 300)
+  const debouncedProvince = useDebounce(provinceFilter, 300)
   const [formOpen, setFormOpen] = useState(false)
   const [editingConsortium, setEditingConsortium] = useState<Consortium | null>(null)
   const [deletingConsortium, setDeletingConsortium] = useState<Consortium | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const params: Record<string, unknown> = { page, limit: 20 }
-  if (cityFilter) params.city = cityFilter
-  if (provinceFilter) params.province = provinceFilter
+  if (debouncedCity) params.city = debouncedCity
+  if (debouncedProvince) params.province = debouncedProvince
 
   const { data, isLoading, error } = useConsortiums(params)
   const deleteMutation = useDeleteConsortium()
@@ -61,22 +64,6 @@ export default function ConsortiumsTable() {
       const message = err instanceof Error ? err.message : "Error al eliminar"
       setDeleteError(message)
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-sm text-muted-foreground">Cargando consorcios…</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-        {(error as Error).message}
-      </div>
-    )
   }
 
   const items = data?.items ?? []
@@ -110,7 +97,15 @@ export default function ConsortiumsTable() {
         </Button>
       </div>
 
-      {items.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-sm text-muted-foreground">Cargando consorcios…</p>
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {(error as Error).message}
+        </div>
+      ) : items.length === 0 ? (
         <div className="rounded-lg border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
           No hay consorcios registrados.
         </div>

@@ -46,9 +46,10 @@ export default function ApartmentsTable() {
   const [deletingApartment, setDeletingApartment] = useState<Apartment | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const { data: buildingsData } = useBuildings({ limit: 200 })
+  const { data: buildingsData } = useBuildings({ limit: 100 })
+  const selectedBuildingIdClean = selectedBuildingId.trim()
   const params: Record<string, unknown> = { page, limit: 20 }
-  if (selectedBuildingId) params.buildingId = selectedBuildingId
+  if (selectedBuildingIdClean) params.buildingId = selectedBuildingIdClean
 
   const { data, isLoading, error } = useApartments(params)
   const deleteMutation = useDeleteApartment()
@@ -56,8 +57,9 @@ export default function ApartmentsTable() {
   const handleBuildingChange = (value: string) => {
     setSelectedBuildingId(value)
     setPage(1)
-    if (value) {
-      setSearchParams({ buildingId: value })
+    const trimmed = value.trim()
+    if (trimmed) {
+      setSearchParams({ buildingId: trimmed })
     } else {
       setSearchParams({})
     }
@@ -83,22 +85,6 @@ export default function ApartmentsTable() {
       const message = err instanceof Error ? err.message : "Error al eliminar"
       setDeleteError(message)
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-sm text-muted-foreground">Cargando departamentos…</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-        {(error as Error).message}
-      </div>
-    )
   }
 
   const items = data?.items ?? []
@@ -127,9 +113,17 @@ export default function ApartmentsTable() {
         </Button>
       </div>
 
-      {items.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-sm text-muted-foreground">Cargando departamentos…</p>
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {(error as Error).message}
+        </div>
+      ) : items.length === 0 ? (
         <div className="rounded-lg border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
-          No hay departamentos registrados{selectedBuildingId ? " para este edificio" : ""}.
+          No hay departamentos registrados{selectedBuildingIdClean ? " para este edificio" : ""}.
         </div>
       ) : (
         <div className="rounded-lg border">

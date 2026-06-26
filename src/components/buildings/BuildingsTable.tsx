@@ -46,9 +46,10 @@ export default function BuildingsTable() {
   const [deletingBuilding, setDeletingBuilding] = useState<Building | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const { data: consortiumsData } = useConsortiums({ limit: 200 })
+  const { data: consortiumsData } = useConsortiums({ limit: 100 })
+  const selectedConsortiumIdClean = selectedConsortiumId.trim()
   const params: Record<string, unknown> = { page, limit: 20 }
-  if (selectedConsortiumId) params.consortiumId = selectedConsortiumId
+  if (selectedConsortiumIdClean) params.consortiumId = selectedConsortiumIdClean
 
   const { data, isLoading, error } = useBuildings(params)
   const deleteMutation = useDeleteBuilding()
@@ -56,8 +57,9 @@ export default function BuildingsTable() {
   const handleConsortiumChange = (value: string) => {
     setSelectedConsortiumId(value)
     setPage(1)
-    if (value) {
-      setSearchParams({ consortiumId: value })
+    const trimmed = value.trim()
+    if (trimmed) {
+      setSearchParams({ consortiumId: trimmed })
     } else {
       setSearchParams({})
     }
@@ -83,22 +85,6 @@ export default function BuildingsTable() {
       const message = err instanceof Error ? err.message : "Error al eliminar"
       setDeleteError(message)
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-sm text-muted-foreground">Cargando edificios…</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-        {(error as Error).message}
-      </div>
-    )
   }
 
   const items = data?.items ?? []
@@ -127,9 +113,17 @@ export default function BuildingsTable() {
         </Button>
       </div>
 
-      {items.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-sm text-muted-foreground">Cargando edificios…</p>
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {(error as Error).message}
+        </div>
+      ) : items.length === 0 ? (
         <div className="rounded-lg border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
-          No hay edificios registrados{selectedConsortiumId ? " para este consorcio" : ""}.
+          No hay edificios registrados{selectedConsortiumIdClean ? " para este consorcio" : ""}.
         </div>
       ) : (
         <div className="rounded-lg border">
