@@ -145,7 +145,8 @@ Todas las rutas requieren autenticación (sin restricción de roles explícita e
 | Método | Ruta | Roles | Body | Respuesta |
 |--------|------|-------|------|-----------|
 | GET | `/api/expenses` | ADMIN, MANAGER, OWNER, TENANT | Query: `page?`, `limit?`, `apartmentId?`, `period?`, `status?` | Lista paginada |
-| PUT | `/api/expenses/:id/mark-paid` | ADMIN | — | Marcada como pagada |
+| PUT | `/api/expenses/:id/mark-paid` | ADMIN | — | Marcada como pagada (`status: "PAID"`) |
+| PUT | `/api/expenses/:id/mark-pending` | ADMIN | — | Revierte a pendiente solo si estaba `PAID` (corrección manual) |
 | POST | `/api/expenses/generate` | ADMIN | `{ consortiumId, period, description, amount, dueDate? }` | Genera expensas masivas para todos los deptos del consorcio |
 
 ---

@@ -48,8 +48,40 @@ export function post<T = unknown>(path: string, body?: unknown) {
   return request<T>("POST", path, body)
 }
 
+export function postFormData<T = unknown>(path: string, formData: FormData) {
+  return rawRequest<T>("POST", path, formData)
+}
+
 export function put<T = unknown>(path: string, body?: unknown) {
   return request<T>("PUT", path, body)
+}
+
+async function rawRequest<T = unknown>(
+  method: string,
+  path: string,
+  body?: FormData,
+): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method,
+    headers: undefined,
+    credentials: "include",
+    body,
+  })
+
+  if (res.status === 401) {
+    window.location.href = "/login"
+    throw new BrowserApiError("No autorizado", "UNAUTHORIZED", 401)
+  }
+
+  const payload = await res.json()
+
+  if (!res.ok) {
+    const message = payload?.error?.message ?? "Error desconocido"
+    const code = payload?.error?.code ?? "API_ERROR"
+    throw new BrowserApiError(message, code, res.status)
+  }
+
+  return payload
 }
 
 export function del<T = unknown>(path: string) {
