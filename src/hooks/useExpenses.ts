@@ -124,6 +124,7 @@ export function useGenerateBulkExpenses() {
     mutationFn: (data: {
       consortiumId: string
       buildingId?: string
+      apartmentId?: string
       period: string
       description: string
       amount: number

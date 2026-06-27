@@ -10,10 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useGenerateBulkExpenses } from "@/hooks/useExpenses"
 import { useConsortiums } from "@/hooks/useConsortiums"
 import { useBuildings } from "@/hooks/useBuildings"
+import { useApartments } from "@/hooks/useApartments"
 
 const bulkSchema = z.object({
   consortiumId: z.string().min(1, "El consorcio es requerido"),
   buildingId: z.string().optional(),
+  apartmentId: z.string().optional(),
   period: z.string().min(1, "El período es requerido"),
   amount: z.coerce.number().positive("El importe debe ser positivo"),
   description: z.string().min(1, "La descripción es requerida"),
@@ -45,6 +47,7 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
     defaultValues: {
       consortiumId: "",
       buildingId: "",
+      apartmentId: "",
       period: "",
       amount: 0,
       description: "",
@@ -58,11 +61,18 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
   )
   const buildings = buildingsData?.items ?? []
 
+  const selectedBuildingId = watch("buildingId")
+  const { data: apartmentsData, isLoading: apartmentsLoading } = useApartments(
+    selectedBuildingId ? { limit: 100, buildingId: selectedBuildingId } : { limit: 100 }
+  )
+  const apartments = apartmentsData?.items ?? []
+
   useEffect(() => {
     if (open) {
       reset({
         consortiumId: "",
         buildingId: "",
+        apartmentId: "",
         period: "",
         amount: 0,
         description: "",
@@ -76,6 +86,7 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
     reset({
       consortiumId: "",
       buildingId: "",
+      apartmentId: "",
       period: "",
       amount: 0,
       description: "",
@@ -90,6 +101,7 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
       await generateMutation.mutateAsync({
         consortiumId: data.consortiumId,
         buildingId: data.buildingId || undefined,
+        apartmentId: data.apartmentId || undefined,
         period: data.period,
         description: data.description,
         amount: data.amount,
@@ -153,7 +165,10 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
             <Label htmlFor="buildingId">Edificio <span className="text-muted-foreground font-normal">(opcional)</span></Label>
             <Select
               value={watch("buildingId") ?? ""}
-              onValueChange={(v) => setValue("buildingId", v, { shouldValidate: true })}
+              onValueChange={(v) => {
+                setValue("buildingId", v, { shouldValidate: true })
+                setValue("apartmentId", "")
+              }}
               disabled={!selectedConsortiumId || buildingsLoading}
             >
               <SelectTrigger id="buildingId">
@@ -174,6 +189,34 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
             </Select>
             {errors.buildingId && (
               <p className="text-xs text-destructive">{errors.buildingId.message}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="apartmentId">Departamento <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+            <Select
+              value={watch("apartmentId") ?? ""}
+              onValueChange={(v) => setValue("apartmentId", v, { shouldValidate: true })}
+              disabled={!selectedBuildingId || apartmentsLoading}
+            >
+              <SelectTrigger id="apartmentId">
+                <SelectValue placeholder={
+                  !selectedBuildingId
+                    ? "Primero seleccioná un edificio"
+                    : apartmentsLoading
+                      ? "Cargando…"
+                      : "Todos los departamentos"
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos los departamentos</SelectItem>
+                {apartments.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.unitNumber}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.apartmentId && (
+              <p className="text-xs text-destructive">{errors.apartmentId.message}</p>
             )}
           </div>
 
