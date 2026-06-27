@@ -28,7 +28,7 @@ interface Props {
 export default function CreateAnnouncementDialog({ open, onOpenChange }: Props) {
   const [serverError, setServerError] = useState<string | null>(null)
   const createMutation = useCreateAnnouncement()
-  const { data: consortiumsData } = useConsortiums({ limit: 200 })
+  const { data: consortiumsData } = useConsortiums({ limit: 100 })
   const consortiums = consortiumsData?.items ?? []
 
   const {
@@ -83,7 +83,14 @@ export default function CreateAnnouncementDialog({ open, onOpenChange }: Props) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent
+        className="sm:max-w-lg"
+        onPointerDownOutside={(e) => {
+          const originalEvent = (e as CustomEvent).detail as { originalEvent?: PointerEvent } | undefined
+          const target = originalEvent?.originalEvent?.target as HTMLElement | null
+          if (target?.closest('[data-slot="select-content"]')) e.preventDefault()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Nuevo aviso</DialogTitle>
           <DialogDescription>

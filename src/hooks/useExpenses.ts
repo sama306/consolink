@@ -107,11 +107,23 @@ export function useMarkExpensePaid() {
   })
 }
 
+export function useMarkExpensePending() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      put<ApiItemResponse<Expense>>(`/expenses/${id}/mark-pending`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [expensesKey] })
+    },
+  })
+}
+
 export function useGenerateBulkExpenses() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (data: {
       consortiumId: string
+      buildingId?: string
       period: string
       description: string
       amount: number

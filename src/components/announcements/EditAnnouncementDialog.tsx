@@ -74,7 +74,14 @@ export default function EditAnnouncementDialog({ announcement, onOpenChange }: P
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent
+        className="sm:max-w-lg"
+        onPointerDownOutside={(e) => {
+          const originalEvent = (e as CustomEvent).detail as { originalEvent?: PointerEvent } | undefined
+          const target = originalEvent?.originalEvent?.target as HTMLElement | null
+          if (target?.closest('[data-slot="select-content"]')) e.preventDefault()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Editar aviso</DialogTitle>
           <DialogDescription>

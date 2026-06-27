@@ -25,7 +25,7 @@ export default function DocumentsTable({ userRoles }: Props) {
   if (debouncedConsortium) params.consortiumId = debouncedConsortium
 
   const { data, isLoading, error } = useDocuments(params)
-  const { data: consortiumsData } = useConsortiums({ limit: 200 })
+  const { data: consortiumsData } = useConsortiums({ limit: 100 })
 
   const items = data?.items ?? []
   const totalPages = data?.totalPages ?? 1

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useExpenses, useMarkExpensePaid, STATUS_LABELS, getStatusVariant, type Expense } from "@/hooks/useExpenses"
+import { useExpenses, useMarkExpensePaid, useMarkExpensePending, STATUS_LABELS, getStatusVariant, type Expense } from "@/hooks/useExpenses"
 import { useConsortiums } from "@/hooks/useConsortiums"
 import { useBuildings } from "@/hooks/useBuildings"
 import { useDebounce } from "@/lib/use-debounce"
@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CheckCircle, Plus } from "lucide-react"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { CheckCircle, Undo2, Plus } from "lucide-react"
 import GenerateBulkExpensesDialog from "./GenerateBulkExpensesDialog"
 
 interface Props {
@@ -31,6 +32,7 @@ export default function ExpensesTable({ userRoles }: Props) {
   const debouncedPeriod = useDebounce(periodFilter, 300)
   const debouncedStatus = useDebounce(statusFilter, 300)
   const [bulkOpen, setBulkOpen] = useState(false)
+  const [revertingExpense, setRevertingExpense] = useState<Expense | null>(null)
 
   const params: Record<string, unknown> = { page, limit: 20 }
   if (debouncedConsortium) params.consortiumId = debouncedConsortium
@@ -39,11 +41,12 @@ export default function ExpensesTable({ userRoles }: Props) {
   if (debouncedStatus) params.status = debouncedStatus
 
   const { data, isLoading, error } = useExpenses(params)
-  const { data: consortiumsData } = useConsortiums({ limit: 200 })
+  const { data: consortiumsData } = useConsortiums({ limit: 100 })
   const { data: buildingsData } = useBuildings(
-    debouncedConsortium ? { limit: 200, consortiumId: debouncedConsortium } : { limit: 200 }
+    debouncedConsortium ? { limit: 100, consortiumId: debouncedConsortium } : { limit: 100 }
   )
   const markPaidMutation = useMarkExpensePaid()
+  const markPendingMutation = useMarkExpensePending()
 
   const items = data?.items ?? []
   const totalPages = data?.totalPages ?? 1
@@ -66,6 +69,15 @@ export default function ExpensesTable({ userRoles }: Props) {
   const handleMarkPaid = async (expenseId: string) => {
     try {
       await markPaidMutation.mutateAsync(expenseId)
+    } catch {
+    }
+  }
+
+  const handleRevertPending = async () => {
+    if (!revertingExpense) return
+    try {
+      await markPendingMutation.mutateAsync(revertingExpense.id)
+      setRevertingExpense(null)
     } catch {
     }
   }
@@ -191,17 +203,30 @@ export default function ExpensesTable({ userRoles }: Props) {
                     </TableCell>
                     {isAdmin && (
                       <TableCell className="text-right">
-                        {expense.status !== "PAID" && (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => handleMarkPaid(expense.id)}
-                            disabled={markPaidMutation.isPending}
-                            title="Marcar como pagada"
-                          >
-                            <CheckCircle className="size-3.5" />
-                          </Button>
-                        )}
+                        <div className="flex items-center justify-end gap-1">
+                          {expense.status === "PAID" && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => setRevertingExpense(expense)}
+                              disabled={markPendingMutation.isPending}
+                              title="Revertir a pendiente"
+                            >
+                              <Undo2 className="size-3.5" />
+                            </Button>
+                          )}
+                          {expense.status !== "PAID" && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => handleMarkPaid(expense.id)}
+                              disabled={markPaidMutation.isPending}
+                              title="Marcar como pagada"
+                            >
+                              <CheckCircle className="size-3.5" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
@@ -239,6 +264,23 @@ export default function ExpensesTable({ userRoles }: Props) {
       {isAdmin && (
         <GenerateBulkExpensesDialog open={bulkOpen} onOpenChange={setBulkOpen} />
       )}
+
+      <AlertDialog open={!!revertingExpense} onOpenChange={(open) => { if (!open) setRevertingExpense(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revertir expensa a pendiente</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de revertir esta expensa de "{revertingExpense?.description}" ({revertingExpense?.period}) a estado pendiente? Esta acción es una corrección manual de un marcado como pagado.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRevertPending} disabled={markPendingMutation.isPending}>
+              {markPendingMutation.isPending ? "Revirtiendo…" : "Sí, revertir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

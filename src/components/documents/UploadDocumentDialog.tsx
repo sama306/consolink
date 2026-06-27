@@ -27,12 +27,12 @@ export default function UploadDocumentDialog({ open, onOpenChange }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const uploadMutation = useUploadDocument()
-  const { data: consortiumsData } = useConsortiums({ limit: 200 })
+  const { data: consortiumsData } = useConsortiums({ limit: 100 })
   const { data: buildingsData } = useBuildings(
-    consortiumId ? { limit: 200, consortiumId } : { limit: 200 }
+    consortiumId ? { limit: 100, consortiumId } : { limit: 100 }
   )
   const { data: apartmentsData } = useApartments(
-    buildingId ? { limit: 200, buildingId } : { limit: 200 }
+    buildingId ? { limit: 100, buildingId } : { limit: 100 }
   )
 
   const consortiums = consortiumsData?.items ?? []
@@ -78,7 +78,14 @@ export default function UploadDocumentDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onPointerDownOutside={(e) => {
+          const originalEvent = (e as CustomEvent).detail as { originalEvent?: PointerEvent } | undefined
+          const target = originalEvent?.originalEvent?.target as HTMLElement | null
+          if (target?.closest('[data-slot="select-content"]')) e.preventDefault()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Subir documento</DialogTitle>
           <DialogDescription>

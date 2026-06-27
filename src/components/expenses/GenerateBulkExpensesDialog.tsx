@@ -9,9 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { useGenerateBulkExpenses } from "@/hooks/useExpenses"
 import { useConsortiums } from "@/hooks/useConsortiums"
+import { useBuildings } from "@/hooks/useBuildings"
 
 const bulkSchema = z.object({
   consortiumId: z.string().min(1, "El consorcio es requerido"),
+  buildingId: z.string().optional(),
   period: z.string().min(1, "El período es requerido"),
   amount: z.coerce.number().positive("El importe debe ser positivo"),
   description: z.string().min(1, "La descripción es requerida"),
@@ -28,7 +30,7 @@ interface Props {
 export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props) {
   const [serverError, setServerError] = useState<string | null>(null)
   const generateMutation = useGenerateBulkExpenses()
-  const { data: consortiumsData, isLoading: consortiumsLoading } = useConsortiums({ limit: 200 })
+  const { data: consortiumsData, isLoading: consortiumsLoading } = useConsortiums({ limit: 100 })
   const consortiums = consortiumsData?.items ?? []
 
   const {
@@ -42,6 +44,7 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
     resolver: zodResolver(bulkSchema),
     defaultValues: {
       consortiumId: "",
+      buildingId: "",
       period: "",
       amount: 0,
       description: "",
@@ -49,10 +52,17 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
     },
   })
 
+  const selectedConsortiumId = watch("consortiumId")
+  const { data: buildingsData, isLoading: buildingsLoading } = useBuildings(
+    selectedConsortiumId ? { limit: 100, consortiumId: selectedConsortiumId } : { limit: 100 }
+  )
+  const buildings = buildingsData?.items ?? []
+
   useEffect(() => {
     if (open) {
       reset({
         consortiumId: "",
+        buildingId: "",
         period: "",
         amount: 0,
         description: "",
@@ -65,6 +75,7 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
   const handleReset = () => {
     reset({
       consortiumId: "",
+      buildingId: "",
       period: "",
       amount: 0,
       description: "",
@@ -78,6 +89,7 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
     try {
       await generateMutation.mutateAsync({
         consortiumId: data.consortiumId,
+        buildingId: data.buildingId || undefined,
         period: data.period,
         description: data.description,
         amount: data.amount,
@@ -92,11 +104,18 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleReset(); onOpenChange(v) }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onPointerDownOutside={(e) => {
+          const originalEvent = (e as CustomEvent).detail as { originalEvent?: PointerEvent } | undefined
+          const target = originalEvent?.originalEvent?.target as HTMLElement | null
+          if (target?.closest('[data-slot="select-content"]')) e.preventDefault()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Generar expensas masivas</DialogTitle>
           <DialogDescription>
-            Generá expensas para todos los departamentos de un consorcio en un período.
+            Generá expensas para los departamentos de un consorcio (o un edificio específico) en un período.
           </DialogDescription>
         </DialogHeader>
 
@@ -111,7 +130,10 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
             <Label htmlFor="consortiumId">Consorcio</Label>
             <Select
               value={watch("consortiumId")}
-              onValueChange={(v) => setValue("consortiumId", v, { shouldValidate: true })}
+              onValueChange={(v) => {
+                setValue("consortiumId", v, { shouldValidate: true })
+                setValue("buildingId", "")
+              }}
             >
               <SelectTrigger id="consortiumId">
                 <SelectValue placeholder={consortiumsLoading ? "Cargando…" : "Seleccionar consorcio"} />
@@ -124,6 +146,34 @@ export default function GenerateBulkExpensesDialog({ open, onOpenChange }: Props
             </Select>
             {errors.consortiumId && (
               <p className="text-xs text-destructive">{errors.consortiumId.message}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="buildingId">Edificio <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+            <Select
+              value={watch("buildingId") ?? ""}
+              onValueChange={(v) => setValue("buildingId", v, { shouldValidate: true })}
+              disabled={!selectedConsortiumId || buildingsLoading}
+            >
+              <SelectTrigger id="buildingId">
+                <SelectValue placeholder={
+                  !selectedConsortiumId
+                    ? "Primero seleccioná un consorcio"
+                    : buildingsLoading
+                      ? "Cargando…"
+                      : "Todos los edificios"
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos los edificios</SelectItem>
+                {buildings.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.buildingId && (
+              <p className="text-xs text-destructive">{errors.buildingId.message}</p>
             )}
           </div>
 
