@@ -30,15 +30,16 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { Plus, Pencil, Trash2, AlertTriangle, Eye, Users } from "lucide-react"
 import TenantFormDialog from "./TenantFormDialog"
 
 function ContractBadge({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    active: "bg-emerald-500/10 text-emerald-600 border-emerald-200",
-    expiring_soon: "bg-amber-500/10 text-amber-600 border-amber-200",
-    expired: "bg-red-500/10 text-red-600 border-red-200",
-    no_end_date: "bg-muted text-muted-foreground border-border",
+  const variantMap: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
+    active: "success",
+    expiring_soon: "warning",
+    expired: "destructive",
+    no_end_date: "secondary",
   }
   const labels: Record<string, string> = {
     active: "Activo",
@@ -47,9 +48,9 @@ function ContractBadge({ status }: { status: string }) {
     no_end_date: "Sin fecha",
   }
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${colors[status] ?? colors.no_end_date}`}>
+    <Badge variant={variantMap[status] ?? "secondary"}>
       {labels[status] ?? status}
-    </span>
+    </Badge>
   )
 }
 

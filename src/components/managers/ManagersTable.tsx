@@ -121,7 +121,7 @@ export default function ManagersTable() {
                   <TableCell className="text-muted-foreground">{m.title ?? "—"}</TableCell>
                   <TableCell>
                     {m.isSupervisor ? (
-                      <BadgeCheck className="size-4 text-emerald-500" />
+                      <BadgeCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
                     ) : (
                       <span className="text-xs text-muted-foreground">No</span>
                     )}
