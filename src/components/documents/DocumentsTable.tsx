@@ -98,7 +98,7 @@ export default function DocumentsTable({ userRoles }: Props) {
                     {new Date(doc.createdAt).toLocaleDateString("es-AR")}
                   </TableCell>
                   <TableCell className="text-right">
-                    <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
+                    <a href={`${(import.meta.env.PUBLIC_API_URL ?? "http://localhost:3001/api").replace("/api", "")}/uploads/${doc.fileUrl.split("/").pop()}`} target="_blank" rel="noopener noreferrer">
                       <Button variant="ghost" size="icon-sm">
                         <Download className="size-3.5" />
                       </Button>

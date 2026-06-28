@@ -25,6 +25,8 @@ import {
   type Apartment,
 } from "@/hooks/useApartments"
 import { useBuildings } from "@/hooks/useBuildings"
+import { useOwners } from "@/hooks/useOwners"
+import { useTenants } from "@/hooks/useTenants"
 import { useState, useEffect } from "react"
 
 const apartmentSchema = z.object({
@@ -54,10 +56,14 @@ export default function ApartmentFormDialog({ open, onOpenChange, apartment, bui
   const createMutation = useCreateApartment()
   const updateMutation = useUpdateApartment(apartment?.id ?? "")
   const { data: buildingsData } = useBuildings({ limit: 100 })
+  const { data: ownersData } = useOwners({ limit: 100 })
+  const { data: tenantsData } = useTenants({ limit: 100 })
   const [serverError, setServerError] = useState<string | null>(null)
 
   const isEdit = !!apartment
   const buildings = buildingsData?.items ?? []
+  const owners = ownersData?.items ?? []
+  const tenants = tenantsData?.items ?? []
 
   const {
     register,
@@ -216,15 +222,38 @@ export default function ApartmentFormDialog({ open, onOpenChange, apartment, bui
               <Input id="status" {...register("status")} placeholder="occupied" />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ownerId">ID del Propietario</Label>
-              <Input id="ownerId" {...register("ownerId")} />
+            <div className="flex flex-col gap-1.5 col-span-2">
+              <Label htmlFor="ownerId">Propietario</Label>
+              <Select value={watch("ownerId")} onValueChange={(v) => setValue("ownerId", v)}>
+                <SelectTrigger id="ownerId">
+                  <SelectValue placeholder="Seleccionar propietario" />
+                </SelectTrigger>
+                <SelectContent>
+                  {owners.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.user.firstName} {o.user.lastName}{o.dni ? ` (DNI: ${o.dni})` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.ownerId && <p className="text-xs text-destructive">{errors.ownerId.message}</p>}
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="tenantId">ID del Inquilino</Label>
-              <Input id="tenantId" {...register("tenantId")} />
+            <div className="flex flex-col gap-1.5 col-span-2">
+              <Label htmlFor="tenantId">Inquilino</Label>
+              <Select value={watch("tenantId")} onValueChange={(v) => setValue("tenantId", v)}>
+                <SelectTrigger id="tenantId">
+                  <SelectValue placeholder="Ninguno (opcional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Ninguno</SelectItem>
+                  {tenants.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.user.firstName} {t.user.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
