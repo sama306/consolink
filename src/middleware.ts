@@ -6,6 +6,9 @@ export type User = {
   id: string;
   email: string;
   roles: string[];
+  ownerId?: string;
+  tenantId?: string;
+  managerId?: string;
 };
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -36,6 +39,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
       id: apiUser.id,
       email: apiUser.email,
       roles: (apiUser.userRoles ?? []).map((ur: any) => ur.role.name),
+      ownerId: apiUser.owner?.id ?? undefined,
+      tenantId: apiUser.tenant?.id ?? undefined,
+      managerId: apiUser.manager?.id ?? undefined,
     };
   } catch {
     context.locals.user = undefined;

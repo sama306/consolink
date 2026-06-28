@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { useCreateTicket } from "@/hooks/useTickets"
-import { useApartments, type Apartment } from "@/hooks/useApartments"
+import { useApartments, useOwnerApartments, type Apartment } from "@/hooks/useApartments"
 import { useState, useEffect } from "react"
 import { PRIORITY_LABELS } from "@/hooks/useTickets"
 
@@ -24,15 +24,24 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   userRoles: string[]
+  ownerId?: string
+  tenantId?: string
 }
 
-export default function CreateTicketDialog({ open, onOpenChange, userRoles }: Props) {
+export default function CreateTicketDialog({ open, onOpenChange, userRoles, ownerId, tenantId }: Props) {
   const createMutation = useCreateTicket()
-  const { data: apartmentsData, isLoading: apartmentsLoading, error: apartmentsError } = useApartments({ limit: 200 })
+  const isOwner = userRoles.includes("OWNER")
+  const isAdminManager = userRoles.includes("ADMIN") || userRoles.includes("MANAGER")
+
+  const { data: apartmentsData, isLoading: apartmentsLoading, error: apartmentsError } =
+    isOwner && ownerId
+      ? useOwnerApartments(ownerId)
+      : useApartments({ limit: 200 })
+
   const [serverError, setServerError] = useState<string | null>(null)
 
   const apartments = apartmentsData?.items ?? []
-  const canAccessApartments = userRoles.includes("ADMIN") || userRoles.includes("MANAGER") || userRoles.includes("OWNER")
+  const canAccessApartments = isOwner || isAdminManager
 
   const {
     register,

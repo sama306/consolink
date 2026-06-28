@@ -5,9 +5,11 @@ import type { Ticket } from "@/hooks/useTickets"
 
 interface Props {
   userRoles: string[]
+  ownerId?: string
+  tenantId?: string
 }
 
-export default function TicketsPageRoot({ userRoles }: Props) {
+export default function TicketsPageRoot({ userRoles, ownerId, tenantId }: Props) {
   const isAdmin = userRoles.includes("ADMIN")
   const isManager = userRoles.includes("MANAGER")
   const isOwnerTenant = userRoles.includes("OWNER") || userRoles.includes("TENANT")
@@ -34,7 +36,7 @@ export default function TicketsPageRoot({ userRoles }: Props) {
           <h1 className="text-2xl font-semibold">{title}</h1>
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </div>
-        <TicketsTable userRoles={userRoles} />
+        <TicketsTable userRoles={userRoles} ownerId={ownerId} tenantId={tenantId} />
       </div>
     </QueryProvider>
   )

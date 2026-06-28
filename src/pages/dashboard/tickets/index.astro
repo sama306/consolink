@@ -9,5 +9,5 @@ const user = _user
 ---
 
 <DashboardLayout user={user}>
-  <TicketsPageRoot client:load userRoles={user.roles} />
+  <TicketsPageRoot client:load userRoles={user.roles} ownerId={user.ownerId} tenantId={user.tenantId} />
 </DashboardLayout>

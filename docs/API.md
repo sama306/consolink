@@ -24,15 +24,17 @@ Rutas públicas (sin middleware `authenticate`), excepto `/me` que requiere aute
 
 ## Dominio: Users (`/api/users`)
 
-Todas las rutas requieren autenticación (sin restricción de roles explícita en routes).
+Todas las rutas requieren autenticación **y** rol ADMIN.
 
 | Método | Ruta | Roles | Body | Respuesta exitosa |
 |--------|------|-------|------|-------------------|
-| GET | `/api/users` | Autenticado | — | Lista de usuarios |
-| GET | `/api/users/:id` | Autenticado | — | Usuario por ID |
-| POST | `/api/users` | Autenticado | `{ email, password (min 6), firstName, lastName, phone? }` | Usuario creado |
-| PATCH | `/api/users/:id` | Autenticado | `{ firstName?, lastName?, phone?, avatarUrl? }` | Usuario actualizado |
-| DELETE | `/api/users/:id` | Autenticado | — | Usuario eliminado (soft delete) |
+| GET | `/api/users` | ADMIN | — | Lista de usuarios (con userRoles, sin password_hash) |
+| GET | `/api/users/:id` | ADMIN | — | Usuario por ID |
+| POST | `/api/users` | ADMIN | `{ email, password (min 6), firstName, lastName, phone?, roleName }` | `201` Usuario creado |
+| PATCH | `/api/users/:id` | ADMIN | `{ firstName?, lastName?, phone?, avatarUrl?, isActive? }` | Usuario actualizado |
+| PUT | `/api/users/:id/roles` | ADMIN | `{ roles: [{ roleName: "ADMIN"\|"OWNER"\|"TENANT"\|"MANAGER", action: "add"\|"remove" }] }` | Usuario con roles actualizados |
+| POST | `/api/users/:id/reset-password` | ADMIN | `{ password: string (min 6) }` | `{ message: "Password updated successfully" }` |
+| DELETE | `/api/users/:id` | ADMIN | — | `204` Soft delete |
 
 ---
 
