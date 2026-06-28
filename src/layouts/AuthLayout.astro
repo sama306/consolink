@@ -1,5 +1,6 @@
 ---
 import "@/styles/global.css"
+import ThemeToggle from "@/components/ThemeToggle"
 ---
 
 <html lang="es">
@@ -8,8 +9,22 @@ import "@/styles/global.css"
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Consolink</title>
+    <script is:inline>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (!theme) {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body class="flex min-h-dvh items-center justify-center bg-muted p-4">
+    <div class="absolute top-4 right-4">
+      <ThemeToggle client:load />
+    </div>
     <slot />
   </body>
 </html>

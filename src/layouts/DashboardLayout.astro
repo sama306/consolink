@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css"
 import type { User } from "@/middleware"
+import ThemeToggle from "@/components/ThemeToggle"
 import {
   Building2,
   Warehouse,
@@ -18,6 +19,7 @@ import {
   HelpCircle,
   ClipboardList,
   LogOut,
+  Menu,
   type LucideIcon,
 } from "lucide-react"
 
@@ -51,7 +53,6 @@ const rolesNavMap: Record<string, NavItem[]> = {
     { label: "Mis Propiedades", href: "/dashboard/propiedades", icon: Home },
     { label: "Mis Tickets", href: "/dashboard/tickets", icon: Ticket },
     { label: "Mis Expensas", href: "/dashboard/expensas", icon: Receipt },
-    { label: "Mis Consultas", href: "/dashboard/consultas", icon: HelpCircle },
     { label: "Documentos", href: "/dashboard/documentos", icon: FileText },
     { label: "Avisos", href: "/dashboard/avisos", icon: Megaphone },
   ],
@@ -59,7 +60,6 @@ const rolesNavMap: Record<string, NavItem[]> = {
     { label: "Mi Unidad", href: "/dashboard/unidad", icon: DoorOpen },
     { label: "Mis Tickets", href: "/dashboard/tickets", icon: Ticket },
     { label: "Mis Expensas", href: "/dashboard/expensas", icon: Receipt },
-    { label: "Mis Consultas", href: "/dashboard/consultas", icon: HelpCircle },
     { label: "Documentos", href: "/dashboard/documentos", icon: FileText },
     { label: "Avisos", href: "/dashboard/avisos", icon: Megaphone },
   ],
@@ -93,9 +93,28 @@ for (const role of user.roles) {
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Consolink</title>
+    <script is:inline>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (!theme) {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body class="flex min-h-dvh">
-    <aside class="flex w-60 flex-col border-r bg-sidebar">
+    <div
+      id="sidebar-overlay"
+      class="fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity lg:hidden"
+    ></div>
+
+    <aside
+      id="sidebar"
+      class="fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r bg-sidebar transition-transform -translate-x-full lg:static lg:translate-x-0"
+    >
       <div class="flex h-14 items-center gap-2 border-b px-4">
         <div class="size-7 rounded-lg bg-primary flex items-center justify-center">
           <span class="text-sm font-bold text-primary-foreground">C</span>
@@ -138,8 +157,48 @@ for (const role of user.roles) {
       </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-6">
-      <slot />
-    </main>
+    <div class="flex flex-1 flex-col min-w-0">
+      <header class="flex h-14 items-center gap-3 border-b bg-background px-4 lg:px-6">
+        <button
+          id="hamburger"
+          class="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Abrir menú"
+          onclick="toggleSidebar()"
+        >
+          <Menu size={20} />
+        </button>
+        <span class="text-sm font-semibold lg:hidden">Consolink</span>
+        <div class="ml-auto flex items-center gap-2">
+          <ThemeToggle client:load />
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+        <slot />
+      </main>
+    </div>
   </body>
 </html>
+
+<script is:inline>
+  function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar')
+    var overlay = document.getElementById('sidebar-overlay')
+    if (!sidebar || !overlay) return
+
+    sidebar.classList.toggle('translate-x-0')
+    sidebar.classList.toggle('-translate-x-full')
+    overlay.classList.toggle('opacity-0')
+    overlay.classList.toggle('pointer-events-none')
+    overlay.classList.toggle('opacity-100')
+    overlay.classList.toggle('pointer-events-auto')
+
+    if (overlay.classList.contains('opacity-100')) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }
+
+  document.getElementById('sidebar-overlay')?.addEventListener('click', toggleSidebar)
+</script>
