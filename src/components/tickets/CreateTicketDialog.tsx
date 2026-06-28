@@ -6,16 +6,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { useCreateTicket } from "@/hooks/useTickets"
+import { useCreateTicket, PRIORITY_LABELS } from "@/hooks/useTickets"
 import { useApartments, useOwnerApartments, type Apartment } from "@/hooks/useApartments"
+import { useManagers, type Manager } from "@/hooks/useManagers"
 import { useState, useEffect } from "react"
-import { PRIORITY_LABELS } from "@/hooks/useTickets"
 
 const createTicketSchema = z.object({
   apartmentId: z.string().min(1, "El departamento es requerido"),
   title: z.string().min(1, "El título es requerido").max(200, "Máximo 200 caracteres"),
   description: z.string().min(1, "La descripción es requerida"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
+  suggestedManagerId: z.string().optional().nullable(),
 })
 
 type CreateTicketFormData = z.infer<typeof createTicketSchema>
@@ -38,9 +39,12 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
       ? useOwnerApartments(ownerId)
       : useApartments({ limit: 200 })
 
+  const { data: managersData, isLoading: managersLoading } = useManagers({ limit: 100 })
+
   const [serverError, setServerError] = useState<string | null>(null)
 
   const apartments = apartmentsData?.items ?? []
+  const managers = managersData?.items ?? []
   const canAccessApartments = isOwner || isAdminManager
 
   const {
@@ -57,6 +61,7 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
       title: "",
       description: "",
       priority: "MEDIUM",
+      suggestedManagerId: null,
     },
   })
 
@@ -67,6 +72,7 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
         title: "",
         description: "",
         priority: "MEDIUM",
+        suggestedManagerId: null,
       })
       setServerError(null)
     }
@@ -80,6 +86,7 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
         title: data.title,
         description: data.description,
         priority: data.priority,
+        suggestedManagerId: data.suggestedManagerId || null,
       })
       onOpenChange(false)
     } catch (err: unknown) {
@@ -184,6 +191,29 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
               </SelectContent>
             </Select>
             {errors.priority && <p className="text-xs text-destructive">{errors.priority.message}</p>}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="suggestedManager">Sugerir un encargado (opcional)</Label>
+            <Select
+              value={watch("suggestedManagerId") ?? ""}
+              onValueChange={(v) => setValue("suggestedManagerId", v || null, { shouldValidate: true })}
+            >
+              <SelectTrigger id="suggestedManager">
+                <SelectValue placeholder={managersLoading ? "Cargando…" : "Sin sugerencia"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sin sugerencia</SelectItem>
+                {managers.map((m: Manager) => (
+                  <SelectItem key={m.id} value={m.userId}>
+                    {m.user.firstName} {m.user.lastName} ({m.user.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.suggestedManagerId && (
+              <p className="text-xs text-destructive">{errors.suggestedManagerId.message}</p>
+            )}
           </div>
 
           <DialogFooter>

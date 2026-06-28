@@ -126,7 +126,7 @@ Todas las rutas requieren autenticación **y** rol ADMIN.
 |--------|------|-------|------|-----------|
 | GET | `/api/tickets` | ADMIN, MANAGER, OWNER, TENANT | Query: `page?`, `limit?`, `status?`, `priority?` | Lista paginada |
 | GET | `/api/tickets/:id` | ADMIN, MANAGER, OWNER, TENANT | — | Ticket por ID |
-| POST | `/api/tickets` | OWNER, TENANT | `{ apartmentId, title (max 200), description, priority? }` | Creado |
+| POST | `/api/tickets` | OWNER, TENANT | `{ apartmentId, title (max 200), description, priority?, suggestedManagerId? }` | Creado |
 | PUT | `/api/tickets/:id/assign` | ADMIN | `{ assignedToId }` | Asignado |
 | PUT | `/api/tickets/:id/status` | ADMIN, MANAGER | `{ status: "OPEN"\|"IN_PROGRESS"\|"PENDING"\|"RESOLVED"\|"CLOSED" }` | Estado actualizado |
 | POST | `/api/tickets/:id/comments` | ADMIN, MANAGER, OWNER, TENANT | `{ content }` (sin schema explícito en routes, se valida en controller) | Comentario creado |

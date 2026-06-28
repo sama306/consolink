@@ -35,6 +35,7 @@ export type Ticket = {
   apartmentId: string
   createdById: string
   assignedToId?: string | null
+  suggestedManagerId?: string | null
   title: string
   description: string
   status: "OPEN" | "IN_PROGRESS" | "PENDING" | "RESOLVED" | "CLOSED"
@@ -45,6 +46,7 @@ export type Ticket = {
   updatedAt: string
   createdBy: TicketUser
   assignedTo?: TicketUser | null
+  suggestedManager?: TicketUser | null
   apartment: TicketApartment
   comments?: TicketComment[]
   _count?: { comments: number }
@@ -152,6 +154,7 @@ export function useCreateTicket() {
       title: string
       description: string
       priority?: string
+      suggestedManagerId?: string | null
     }) => post<ApiItemResponse<Ticket>>("/tickets", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ticketsKey] })
