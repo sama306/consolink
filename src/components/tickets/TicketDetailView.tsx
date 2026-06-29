@@ -119,6 +119,14 @@ export default function TicketDetailView({ ticketId, userRoles }: Props) {
                 : "Sin asignar"}
             </span>
           </div>
+          {isAdmin && ticket.suggestedManager && (
+            <div>
+              <span className="text-muted-foreground">Sugerido por el usuario: </span>
+              <span className="font-medium">
+                {ticket.suggestedManager.firstName} {ticket.suggestedManager.lastName} ({ticket.suggestedManager.email})
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="rounded-lg bg-muted/30 p-4">

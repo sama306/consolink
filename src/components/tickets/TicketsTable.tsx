@@ -14,12 +14,14 @@ import CreateTicketDialog from "./CreateTicketDialog"
 
 interface Props {
   userRoles: string[]
+  ownerId?: string
+  tenantId?: string
 }
 
 const STATUS_FILTERS = ["", "OPEN", "IN_PROGRESS", "PENDING", "RESOLVED", "CLOSED"]
 const PRIORITY_FILTERS = ["", "LOW", "MEDIUM", "HIGH", "URGENT"]
 
-export default function TicketsTable({ userRoles }: Props) {
+export default function TicketsTable({ userRoles, ownerId, tenantId }: Props) {
   const isAdmin = userRoles.includes("ADMIN")
   const canManage = isAdmin || userRoles.includes("MANAGER")
   const canCreate = userRoles.includes("OWNER") || userRoles.includes("TENANT")
@@ -229,6 +231,8 @@ export default function TicketsTable({ userRoles }: Props) {
         open={createOpen}
         onOpenChange={setCreateOpen}
         userRoles={userRoles}
+        ownerId={ownerId}
+        tenantId={tenantId}
       />
 
       <Dialog open={!!assigning} onOpenChange={(open) => { if (!open) { setAssigning(null); setAssignManagerId("") } }}>

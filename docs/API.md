@@ -24,15 +24,17 @@ Rutas públicas (sin middleware `authenticate`), excepto `/me` que requiere aute
 
 ## Dominio: Users (`/api/users`)
 
-Todas las rutas requieren autenticación (sin restricción de roles explícita en routes).
+Todas las rutas requieren autenticación **y** rol ADMIN.
 
 | Método | Ruta | Roles | Body | Respuesta exitosa |
 |--------|------|-------|------|-------------------|
-| GET | `/api/users` | Autenticado | — | Lista de usuarios |
-| GET | `/api/users/:id` | Autenticado | — | Usuario por ID |
-| POST | `/api/users` | Autenticado | `{ email, password (min 6), firstName, lastName, phone? }` | Usuario creado |
-| PATCH | `/api/users/:id` | Autenticado | `{ firstName?, lastName?, phone?, avatarUrl? }` | Usuario actualizado |
-| DELETE | `/api/users/:id` | Autenticado | — | Usuario eliminado (soft delete) |
+| GET | `/api/users` | ADMIN | — | Lista de usuarios (con userRoles, sin password_hash) |
+| GET | `/api/users/:id` | ADMIN | — | Usuario por ID |
+| POST | `/api/users` | ADMIN | `{ email, password (min 6), firstName, lastName, phone?, roleName }` | `201` Usuario creado |
+| PATCH | `/api/users/:id` | ADMIN | `{ firstName?, lastName?, phone?, avatarUrl?, isActive? }` | Usuario actualizado |
+| PUT | `/api/users/:id/roles` | ADMIN | `{ roles: [{ roleName: "ADMIN"\|"OWNER"\|"TENANT"\|"MANAGER", action: "add"\|"remove" }] }` | Usuario con roles actualizados |
+| POST | `/api/users/:id/reset-password` | ADMIN | `{ password: string (min 6) }` | `{ message: "Password updated successfully" }` |
+| DELETE | `/api/users/:id` | ADMIN | — | `204` Soft delete |
 
 ---
 
@@ -124,7 +126,7 @@ Todas las rutas requieren autenticación (sin restricción de roles explícita e
 |--------|------|-------|------|-----------|
 | GET | `/api/tickets` | ADMIN, MANAGER, OWNER, TENANT | Query: `page?`, `limit?`, `status?`, `priority?` | Lista paginada |
 | GET | `/api/tickets/:id` | ADMIN, MANAGER, OWNER, TENANT | — | Ticket por ID |
-| POST | `/api/tickets` | OWNER, TENANT | `{ apartmentId, title (max 200), description, priority? }` | Creado |
+| POST | `/api/tickets` | OWNER, TENANT | `{ apartmentId, title (max 200), description, priority?, suggestedManagerId? }` | Creado |
 | PUT | `/api/tickets/:id/assign` | ADMIN | `{ assignedToId }` | Asignado |
 | PUT | `/api/tickets/:id/status` | ADMIN, MANAGER | `{ status: "OPEN"\|"IN_PROGRESS"\|"PENDING"\|"RESOLVED"\|"CLOSED" }` | Estado actualizado |
 | POST | `/api/tickets/:id/comments` | ADMIN, MANAGER, OWNER, TENANT | `{ content }` (sin schema explícito en routes, se valida en controller) | Comentario creado |

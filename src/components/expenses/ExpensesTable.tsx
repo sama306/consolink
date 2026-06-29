@@ -48,10 +48,18 @@ export default function ExpensesTable({ userRoles }: Props) {
   const markPaidMutation = useMarkExpensePaid()
   const markPendingMutation = useMarkExpensePending()
 
-  const items = data?.items ?? []
+  const items: Expense[] = data?.items ?? []
   const totalPages = data?.totalPages ?? 1
   const consortiums = consortiumsData?.items ?? []
   const buildings = buildingsData?.items ?? []
+
+  const groupedByApt = items.reduce<Record<string, { apartment: Expense["apartment"]; expenses: Expense[] }>>((acc, exp) => {
+    const key = exp.apartmentId
+    if (!acc[key]) acc[key] = { apartment: exp.apartment, expenses: [] }
+    acc[key].expenses.push(exp)
+    return acc
+  }, {})
+  const apartmentGroupKeys = Object.keys(groupedByApt)
 
   const isDueSoon = (dueDate: string) => {
     const due = new Date(dueDate)
@@ -158,82 +166,145 @@ export default function ExpensesTable({ userRoles }: Props) {
         </div>
       ) : (
         <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {isAdmin && <TableHead>Departamento</TableHead>}
-                <TableHead>Período</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead>Importe</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Vencimiento</TableHead>
-                {isAdmin && <TableHead className="w-24 text-right">Acciones</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((expense: Expense) => {
-                const dueSoon = isDueSoon(expense.dueDate)
-                const expired = isOverdue(expense.dueDate, expense.status)
+          {isOwnerTenant && apartmentGroupKeys.length > 1 ? (
+            <div className="divide-y">
+              {apartmentGroupKeys.map((aptKey) => {
+                const group = groupedByApt[aptKey]
+                const aptLabel = `${group.apartment.building?.name ?? "—"} - ${group.apartment.unitNumber}`
                 return (
-                  <TableRow key={expense.id}>
-                    {isAdmin && (
-                      <TableCell className="text-muted-foreground text-xs">
-                        {expense.apartment.building?.name ?? "—"} - {expense.apartment.unitNumber}
-                      </TableCell>
-                    )}
-                    <TableCell className="text-xs font-medium">{expense.period}</TableCell>
-                    <TableCell className="text-xs">{expense.description}</TableCell>
-                    <TableCell className="text-xs font-medium">
-                      ${Number(expense.amount).toLocaleString("es-AR", { minimumFractionDigits: 2 })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusVariant(expense.status)}>
-                        {STATUS_LABELS[expense.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      <span className={dueSoon || expired ? "font-semibold text-destructive" : ""}>
-                        {new Date(expense.dueDate).toLocaleDateString("es-AR")}
-                      </span>
-                      {(dueSoon || expired) && expense.status !== "PAID" && (
-                        <span className="ml-1.5 text-[11px] text-destructive">
-                          ({expired ? "vencida" : "próximo"})
-                        </span>
-                      )}
-                    </TableCell>
-                    {isAdmin && (
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {expense.status === "PAID" && (
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => setRevertingExpense(expense)}
-                              disabled={markPendingMutation.isPending}
-                              title="Revertir a pendiente"
-                            >
-                              <Undo2 className="size-3.5" />
-                            </Button>
-                          )}
-                          {expense.status !== "PAID" && (
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => handleMarkPaid(expense.id)}
-                              disabled={markPaidMutation.isPending}
-                              title="Marcar como pagada"
-                            >
-                              <CheckCircle className="size-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
+                  <div key={aptKey}>
+                    <div className="bg-muted/40 px-4 py-2 text-xs font-semibold text-muted-foreground">
+                      {aptLabel}
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Período</TableHead>
+                          <TableHead>Descripción</TableHead>
+                          <TableHead>Importe</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead>Vencimiento</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {group.expenses.map((expense: Expense) => {
+                          const dueSoon = isDueSoon(expense.dueDate)
+                          const expired = isOverdue(expense.dueDate, expense.status)
+                          return (
+                            <TableRow key={expense.id}>
+                              <TableCell className="text-xs font-medium">{expense.period}</TableCell>
+                              <TableCell className="text-xs">{expense.description}</TableCell>
+                              <TableCell className="text-xs font-medium">
+                                ${Number(expense.amount).toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={getStatusVariant(expense.status)}>
+                                  {STATUS_LABELS[expense.status]}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-xs">
+                                <span className={dueSoon || expired ? "font-semibold text-destructive" : ""}>
+                                  {new Date(expense.dueDate).toLocaleDateString("es-AR")}
+                                </span>
+                                {(dueSoon || expired) && expense.status !== "PAID" && (
+                                  <span className="ml-1.5 text-[11px] text-destructive">
+                                    ({expired ? "vencida" : "próximo"})
+                                  </span>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )
               })}
-            </TableBody>
-          </Table>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {isAdmin && <TableHead>Departamento</TableHead>}
+                  {isOwnerTenant && <TableHead>Unidad</TableHead>}
+                  <TableHead>Período</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead>Importe</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Vencimiento</TableHead>
+                  {isAdmin && <TableHead className="w-24 text-right">Acciones</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map((expense: Expense) => {
+                  const dueSoon = isDueSoon(expense.dueDate)
+                  const expired = isOverdue(expense.dueDate, expense.status)
+                  return (
+                    <TableRow key={expense.id}>
+                      {isAdmin && (
+                        <TableCell className="text-muted-foreground text-xs">
+                          {expense.apartment.building?.name ?? "—"} - {expense.apartment.unitNumber}
+                        </TableCell>
+                      )}
+                      {isOwnerTenant && (
+                        <TableCell className="text-muted-foreground text-xs">
+                          {expense.apartment.building?.name ?? "—"} - {expense.apartment.unitNumber}
+                        </TableCell>
+                      )}
+                      <TableCell className="text-xs font-medium">{expense.period}</TableCell>
+                      <TableCell className="text-xs">{expense.description}</TableCell>
+                      <TableCell className="text-xs font-medium">
+                        ${Number(expense.amount).toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusVariant(expense.status)}>
+                          {STATUS_LABELS[expense.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        <span className={dueSoon || expired ? "font-semibold text-destructive" : ""}>
+                          {new Date(expense.dueDate).toLocaleDateString("es-AR")}
+                        </span>
+                        {(dueSoon || expired) && expense.status !== "PAID" && (
+                          <span className="ml-1.5 text-[11px] text-destructive">
+                            ({expired ? "vencida" : "próximo"})
+                          </span>
+                        )}
+                      </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {expense.status === "PAID" && (
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => setRevertingExpense(expense)}
+                                disabled={markPendingMutation.isPending}
+                                title="Revertir a pendiente"
+                              >
+                                <Undo2 className="size-3.5" />
+                              </Button>
+                            )}
+                            {expense.status !== "PAID" && (
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => handleMarkPaid(expense.id)}
+                                disabled={markPaidMutation.isPending}
+                                title="Marcar como pagada"
+                              >
+                                <CheckCircle className="size-3.5" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
         </div>
       )}
 

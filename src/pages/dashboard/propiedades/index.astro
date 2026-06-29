@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro"
+import { requireRole } from "@/lib/requireAuth"
+import PropiedadesPageRoot from "@/components/propiedades/PropiedadesPageRoot"
+
+const _user = requireRole(Astro, ["OWNER"])
+if (_user instanceof Response) return _user
+const user = _user
+---
+
+<DashboardLayout user={user}>
+  <PropiedadesPageRoot client:load ownerId={user.ownerId} />
+</DashboardLayout>

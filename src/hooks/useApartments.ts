@@ -54,6 +54,26 @@ type ApiItemResponse<T> = {
   data: T
 }
 
+type OwnerApartmentListResponse = {
+  status: string
+  data: (Apartment & { building: { id: string; name: string; consortiumId: string } })[]
+}
+
+export function useOwnerApartments(ownerId: string) {
+  return useQuery({
+    queryKey: [apartmentsKey, "owner", ownerId],
+    queryFn: () => get<OwnerApartmentListResponse>(`/owners/${ownerId}/apartments`),
+    select: (res) => ({
+      items: res.data,
+      total: res.data.length,
+      page: 1,
+      limit: res.data.length,
+      totalPages: 1,
+    }),
+    enabled: !!ownerId,
+  })
+}
+
 export function useApartments(params?: ApartmentListParams) {
   const searchParams = new URLSearchParams()
   if (params?.page) searchParams.set("page", String(params.page))
