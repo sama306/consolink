@@ -16,18 +16,20 @@ interface Props {
   userRoles: string[]
   ownerId?: string
   tenantId?: string
+  forcedStatus?: string | string[]
 }
 
 const STATUS_FILTERS = ["", "OPEN", "IN_PROGRESS", "PENDING", "RESOLVED", "CLOSED"]
 const PRIORITY_FILTERS = ["", "LOW", "MEDIUM", "HIGH", "URGENT"]
 
-export default function TicketsTable({ userRoles, ownerId, tenantId }: Props) {
+export default function TicketsTable({ userRoles, ownerId, tenantId, forcedStatus }: Props) {
   const isAdmin = userRoles.includes("ADMIN")
   const canManage = isAdmin || userRoles.includes("MANAGER")
   const canCreate = userRoles.includes("OWNER") || userRoles.includes("TENANT")
+  const isManagerOnly = userRoles.includes("MANAGER") && !userRoles.includes("ADMIN")
 
   const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState(!forcedStatus && isManagerOnly ? "OPEN" : "")
   const [priorityFilter, setPriorityFilter] = useState("")
   const debouncedStatus = useDebounce(statusFilter, 300)
   const debouncedPriority = useDebounce(priorityFilter, 300)
@@ -36,7 +38,11 @@ export default function TicketsTable({ userRoles, ownerId, tenantId }: Props) {
   const [assignManagerId, setAssignManagerId] = useState("")
 
   const params: Record<string, unknown> = { page, limit: 20 }
-  if (debouncedStatus) params.status = debouncedStatus
+  if (forcedStatus) {
+    params.status = Array.isArray(forcedStatus) ? forcedStatus.join(",") : forcedStatus
+  } else if (debouncedStatus) {
+    params.status = debouncedStatus
+  }
   if (debouncedPriority) params.priority = debouncedPriority
 
   const { data, isLoading, error } = useTickets(params)
@@ -70,20 +76,22 @@ export default function TicketsTable({ userRoles, ownerId, tenantId }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="status-filter" className="text-xs">Estado</Label>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
-            <SelectTrigger className="h-7 w-32 text-xs">
-              <SelectValue placeholder="Todos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
-              {STATUS_FILTERS.filter(Boolean).map((s) => (
-                <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {!forcedStatus && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="status-filter" className="text-xs">Estado</Label>
+            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
+              <SelectTrigger className="h-7 w-32 text-xs">
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos</SelectItem>
+                {STATUS_FILTERS.filter(Boolean).map((s) => (
+                  <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="priority-filter" className="text-xs">Prioridad</Label>
           <Select value={priorityFilter} onValueChange={(v) => { setPriorityFilter(v); setPage(1) }}>
