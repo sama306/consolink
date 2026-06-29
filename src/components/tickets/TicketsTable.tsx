@@ -16,7 +16,7 @@ interface Props {
   userRoles: string[]
   ownerId?: string
   tenantId?: string
-  forcedStatus?: string
+  forcedStatus?: string | string[]
 }
 
 const STATUS_FILTERS = ["", "OPEN", "IN_PROGRESS", "PENDING", "RESOLVED", "CLOSED"]
@@ -29,7 +29,7 @@ export default function TicketsTable({ userRoles, ownerId, tenantId, forcedStatu
   const isManagerOnly = userRoles.includes("MANAGER") && !userRoles.includes("ADMIN")
 
   const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState(forcedStatus ?? (isManagerOnly ? "OPEN" : ""))
+  const [statusFilter, setStatusFilter] = useState(!forcedStatus && isManagerOnly ? "OPEN" : "")
   const [priorityFilter, setPriorityFilter] = useState("")
   const debouncedStatus = useDebounce(statusFilter, 300)
   const debouncedPriority = useDebounce(priorityFilter, 300)
@@ -39,7 +39,7 @@ export default function TicketsTable({ userRoles, ownerId, tenantId, forcedStatu
 
   const params: Record<string, unknown> = { page, limit: 20 }
   if (forcedStatus) {
-    params.status = forcedStatus
+    params.status = Array.isArray(forcedStatus) ? forcedStatus.join(",") : forcedStatus
   } else if (debouncedStatus) {
     params.status = debouncedStatus
   }

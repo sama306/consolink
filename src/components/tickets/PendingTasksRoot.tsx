@@ -20,10 +20,10 @@ export default function PendingTasksRoot({ userRoles }: Props) {
         <div>
           <h1 className="text-2xl font-semibold">Tareas Pendientes</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Tickets que está trabajando actualmente
+            Tickets que está trabajando o pendientes de respuesta
           </p>
         </div>
-        <TicketsTable userRoles={userRoles} forcedStatus="IN_PROGRESS" />
+        <TicketsTable userRoles={userRoles} forcedStatus={["IN_PROGRESS", "PENDING"]} />
       </div>
     </QueryProvider>
   )

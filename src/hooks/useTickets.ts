@@ -55,7 +55,7 @@ export type Ticket = {
 export type TicketListParams = {
   page?: number
   limit?: number
-  status?: string
+  status?: string | string[]
   priority?: string
 }
 
@@ -120,7 +120,10 @@ export function useTickets(params?: TicketListParams) {
   const searchParams = new URLSearchParams()
   if (params?.page) searchParams.set("page", String(params.page))
   if (params?.limit) searchParams.set("limit", String(params.limit))
-  if (params?.status) searchParams.set("status", params.status)
+  if (params?.status) {
+    const statusVal = Array.isArray(params.status) ? params.status.join(",") : params.status
+    searchParams.set("status", statusVal)
+  }
   if (params?.priority) searchParams.set("priority", params.priority)
   const qs = searchParams.toString()
   const path = qs ? `/tickets?${qs}` : "/tickets"
