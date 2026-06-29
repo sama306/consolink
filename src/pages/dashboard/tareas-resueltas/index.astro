@@ -1,0 +1,13 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro"
+import { requireRole } from "@/lib/requireAuth"
+import ResolvedTasksRoot from "@/components/tickets/ResolvedTasksRoot"
+
+const _user = requireRole(Astro, ["ADMIN", "MANAGER"])
+if (_user instanceof Response) return _user
+const user = _user
+---
+
+<DashboardLayout user={user}>
+  <ResolvedTasksRoot client:load userRoles={user.roles} />
+</DashboardLayout>
