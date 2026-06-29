@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { get, put, post } from "@/lib/browser-api-client"
+import { get, put, patch, post } from "@/lib/browser-api-client"
 
 const usersKey = "users"
 
@@ -56,7 +56,7 @@ export function useUpdateUser(id: string) {
 
   return useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      put<ApiItemResponse<AppUser>>(`/users/${id}`, data),
+      patch<ApiItemResponse<AppUser>>(`/users/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [usersKey] })
     },

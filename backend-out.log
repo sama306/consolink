@@ -82,3 +82,10 @@ prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."documents".
 prisma:query COMMIT
 [0mGET /api/documents?limit=50 [32m200[0m 77.212 ms - 3094[0m
 [0mPOST /api/auth/login [33m429[0m 0.464 ms - 103[0m
+[INFO] 20:30:03 Restarting: D:\Astro\Consolink\backend\src\modules\announcements\announcements.service.ts has been modified
+◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Server running on port 3001
+[INFO] 20:30:11 Restarting: D:\Astro\Consolink\backend\src\modules\managers\managers.routes.ts has been modified
+◇ injected env (5) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Server running on port 3001
+[ELIFECYCLE] Command failed with exit code 4294967295.

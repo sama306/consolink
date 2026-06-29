@@ -56,6 +56,10 @@ export function put<T = unknown>(path: string, body?: unknown) {
   return request<T>("PUT", path, body)
 }
 
+export function patch<T = unknown>(path: string, body?: unknown) {
+  return request<T>("PATCH", path, body)
+}
+
 async function rawRequest<T = unknown>(
   method: string,
   path: string,

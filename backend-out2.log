@@ -70,3 +70,50 @@ prisma:query SELECT "public"."tenants"."id", "public"."tenants"."user_id", "publ
 prisma:query SELECT "public"."managers"."id", "public"."managers"."user_id", "public"."managers"."title", "public"."managers"."is_supervisor", "public"."managers"."notes", "public"."managers"."created_at", "public"."managers"."updated_at", "public"."managers"."deleted_at" FROM "public"."managers" WHERE "public"."managers"."user_id" IN ($1) OFFSET $2
 prisma:query SELECT "public"."roles"."id", "public"."roles"."name"::text, "public"."roles"."description", "public"."roles"."created_at", "public"."roles"."updated_at", "public"."roles"."deleted_at" FROM "public"."roles" WHERE "public"."roles"."id" IN ($1) OFFSET $2
 [0mGET /api/auth/me [32m200[0m 31.689 ms - 848[0m
+[INFO] 20:30:03 Restarting: D:\Astro\Consolink\backend\src\modules\announcements\announcements.service.ts has been modified
+◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+Server running on port 3001
+[INFO] 20:30:11 Restarting: D:\Astro\Consolink\backend\src\modules\managers\managers.routes.ts has been modified
+◇ injected env (5) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Server running on port 3001
+prisma:query SELECT "public"."managers"."id", "public"."managers"."user_id", "public"."managers"."title", "public"."managers"."is_supervisor", "public"."managers"."notes", "public"."managers"."created_at", "public"."managers"."updated_at", "public"."managers"."deleted_at" FROM "public"."managers" WHERE "public"."managers"."deleted_at" IS NULL ORDER BY "public"."managers"."created_at" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name" FROM "public"."users" WHERE "public"."users"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."managers"."id" FROM "public"."managers" WHERE "public"."managers"."deleted_at" IS NULL OFFSET $1) AS "sub"
+prisma:query COMMIT
+[0mGET /api/managers?limit=100 [32m200[0m 1523.236 ms - 826[0m
+prisma:error 
+Invalid `prisma.ticket.findMany()` invocation in
+D:\Astro\Consolink\backend\src\modules\tickets\tickets.service.ts:38:21
+
+  35 if (priority) where.priority = priority;
+  36 
+  37 const [data, total] = await prisma.$transaction([
+→ 38   prisma.ticket.findMany(
+Transaction API error: Unable to start a transaction in the given time.
+prisma:error 
+Invalid `prisma.ticket.count()` invocation in
+D:\Astro\Consolink\backend\src\modules\tickets\tickets.service.ts:57:21
+
+  54     _count: { select: { comments: true } },
+  55   },
+  56 }),
+→ 57 prisma.ticket.count(
+Transaction API error: Unable to start a transaction in the given time.
+[0mGET /api/tickets?page=1&limit=20 [33m400[0m 23902.161 ms - 62[0m
+prisma:query SELECT "public"."owners"."id", "public"."owners"."user_id", "public"."owners"."dni", "public"."owners"."tax_id", "public"."owners"."bank_info", "public"."owners"."notes", "public"."owners"."created_at", "public"."owners"."updated_at", "public"."owners"."deleted_at" FROM "public"."owners" WHERE ("public"."owners"."id" = $1 AND "public"."owners"."deleted_at" IS NULL) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."users"."id", "public"."users"."email", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."phone" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."apartments"."id", "public"."apartments"."building_id", "public"."apartments"."unit_number", "public"."apartments"."floor", "public"."apartments"."bedrooms", "public"."apartments"."bathrooms", "public"."apartments"."area_m2", "public"."apartments"."parking_spots", "public"."apartments"."storage_units", "public"."apartments"."status", "public"."apartments"."owner_id", "public"."apartments"."tenant_id", "public"."apartments"."created_at", "public"."apartments"."updated_at", "public"."apartments"."deleted_at" FROM "public"."apartments" WHERE ("public"."apartments"."owner_id" = $1 AND "public"."apartments"."deleted_at" IS NULL) ORDER BY "public"."apartments"."created_at" DESC OFFSET $2
+prisma:query SELECT "public"."buildings"."id", "public"."buildings"."name", "public"."buildings"."consortium_id" FROM "public"."buildings" WHERE "public"."buildings"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."tenants"."id", "public"."tenants"."user_id", "public"."tenants"."lease_start", "public"."tenants"."lease_end", "public"."tenants"."deposit_amount", "public"."tenants"."notes", "public"."tenants"."created_at", "public"."tenants"."updated_at", "public"."tenants"."deleted_at" FROM "public"."tenants" WHERE "public"."tenants"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."users"."id", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."email" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+[0mGET /api/owners/ce1e625b-e221-49aa-983d-eed9bb30b54b/apartments [36m304[0m 24289.970 ms - -[0m
+prisma:query SELECT "public"."tickets"."id", "public"."tickets"."apartment_id", "public"."tickets"."created_by_id", "public"."tickets"."assigned_to_id", "public"."tickets"."suggested_manager_id", "public"."tickets"."title", "public"."tickets"."description", "public"."tickets"."status"::text, "public"."tickets"."priority"::text, "public"."tickets"."category", "public"."tickets"."resolved_at", "public"."tickets"."closed_at", "public"."tickets"."created_at", "public"."tickets"."updated_at", "public"."tickets"."deleted_at", COALESCE("aggr_selection_0_TicketComment"."_aggr_count_comments", 0) AS "_aggr_count_comments" FROM "public"."tickets" LEFT JOIN (SELECT "public"."ticket_comments"."ticket_id", COUNT(*) AS "_aggr_count_comments" FROM "public"."ticket_comments" WHERE 1=1 GROUP BY "public"."ticket_comments"."ticket_id") AS "aggr_selection_0_TicketComment" ON ("public"."tickets"."id" = "aggr_selection_0_TicketComment"."ticket_id") WHERE ("public"."tickets"."deleted_at" IS NULL AND "public"."tickets"."created_by_id" = $1) ORDER BY "public"."tickets"."created_at" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."users"."id", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."email" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."users"."id", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."email" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."users"."id", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."email" FROM "public"."users" WHERE "public"."users"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."apartments"."id", "public"."apartments"."unit_number", "public"."apartments"."building_id" FROM "public"."apartments" WHERE "public"."apartments"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."buildings"."id", "public"."buildings"."name" FROM "public"."buildings" WHERE "public"."buildings"."id" IN ($1) OFFSET $2
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."tickets"."id" FROM "public"."tickets" WHERE ("public"."tickets"."deleted_at" IS NULL AND "public"."tickets"."created_by_id" = $1) OFFSET $2) AS "sub"
+prisma:query COMMIT
+[0mGET /api/tickets?page=1&limit=20 [32m200[0m 1545.774 ms - 888[0m
+[ELIFECYCLE] Command failed with exit code 4294967295.
