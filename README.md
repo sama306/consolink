@@ -18,43 +18,43 @@ _(Las capturas se agregarán a medida que se tomen. Los nombres de archivo suger
 
 | Vista previa |
 |--------------|
-| ![Pantalla de login](./docs/screenshots/login.png) |
+| ![Pantalla de login](./docs/screenshots/login.jpeg) |
 
 ### Dashboard ADMIN
 
 | Vista previa |
 |--------------|
-| ![Dashboard ADMIN](./docs/screenshots/dashboard-admin.png) |
+| ![Dashboard ADMIN](./docs/screenshots/dashboard-admin.jpeg) |
 
 ### Gestión — Consorcios, Edificios y Departamentos
 
 | Consorcios | Edificios | Departamentos |
 |------------|-----------|---------------|
-| ![Consorcios](./docs/screenshots/consorcios.png) | ![Edificios](./docs/screenshots/edificios.png) | ![Departamentos](./docs/screenshots/departamentos.png) |
+| ![Consorcios](./docs/screenshots/consorcios.jpeg) | ![Edificios](./docs/screenshots/edificios.jpeg) | ![Departamentos](./docs/screenshots/departamentos.jpeg) |
 
 ### Dashboard OWNER
 
 | Vista previa |
 |--------------|
-| ![Dashboard OWNER](./docs/screenshots/dashboard-owner.png) |
+| ![Dashboard OWNER](./docs/screenshots/dashboard-owner.jpeg) |
 
 ### Dashboard TENANT
 
 | Vista previa |
 |--------------|
-| ![Dashboard TENANT](./docs/screenshots/dashboard-tenant.png) |
+| ![Dashboard TENANT](./docs/screenshots/dashboard-tenant.jpeg) |
 
 ### Dashboard MANAGER
 
 | Vista previa |
 |--------------|
-| ![Dashboard MANAGER](./docs/screenshots/dashboard-manager.png) |
+| ![Dashboard MANAGER](./docs/screenshots/dashboard-manager.jpeg) |
 
 ### Tema claro / oscuro
 
 | Claro | Oscuro |
 |-------|--------|
-| ![Tema claro](./docs/screenshots/theme-light.png) | ![Tema oscuro](./docs/screenshots/theme-dark.png) |
+| ![Tema claro](./docs/screenshots/theme-light.jpeg) | ![Tema oscuro](./docs/screenshots/theme-dark.jpeg) |
 
 ---
 
