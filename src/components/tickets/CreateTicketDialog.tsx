@@ -1,6 +1,8 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { useQuery } from "@tanstack/react-query"
+import { get } from "@/lib/browser-api-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +14,7 @@ import { useManagers, type Manager } from "@/hooks/useManagers"
 import { useState, useEffect } from "react"
 
 const createTicketSchema = z.object({
-  apartmentId: z.string().min(1, "El departamento es requerido"),
+  apartmentId: z.string().optional().default(""),
   title: z.string().min(1, "El título es requerido").max(200, "Máximo 200 caracteres"),
   description: z.string().min(1, "La descripción es requerida"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
@@ -34,10 +36,21 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
   const isOwner = userRoles.includes("OWNER")
   const isAdminManager = userRoles.includes("ADMIN") || userRoles.includes("MANAGER")
 
+  const isTenant = userRoles.includes("TENANT")
+
   const { data: apartmentsData, isLoading: apartmentsLoading, error: apartmentsError } =
     isOwner && ownerId
       ? useOwnerApartments(ownerId)
-      : useApartments({ limit: 200 })
+      : isTenant
+        ? { data: undefined, isLoading: false, error: null }
+        : useApartments({ limit: 200 })
+
+  const { data: tenantApartment, isLoading: tenantAptLoading } = useQuery({
+    queryKey: ["tenant-apartment-form", tenantId],
+    queryFn: () => get<{ status: string; data: any }>(`/tenants/${tenantId}/apartment`),
+    select: (res) => res.data,
+    enabled: !!tenantId && isTenant,
+  })
 
   const { data: managersData, isLoading: managersLoading } = useManagers({ limit: 100 })
 
@@ -76,13 +89,25 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
       })
       setServerError(null)
     }
-  }, [open, reset])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  useEffect(() => {
+    if (isTenant && tenantApartment) {
+      setValue("apartmentId", tenantApartment.id, { shouldValidate: true })
+    }
+  }, [isTenant, tenantApartment, setValue])
 
   const onSubmit = async (data: CreateTicketFormData) => {
     setServerError(null)
+    const apartmentId = isTenant && tenantApartment ? tenantApartment.id : data.apartmentId
+    if (!apartmentId) {
+      setServerError("El departamento es requerido")
+      return
+    }
     try {
       await createMutation.mutateAsync({
-        apartmentId: data.apartmentId,
+        apartmentId,
         title: data.title,
         description: data.description,
         priority: data.priority,
@@ -114,7 +139,25 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="apartmentId">Departamento</Label>
-            {canAccessApartments ? (
+            {isTenant ? (
+              <>
+                {tenantAptLoading ? (
+                  <div className="h-9 rounded-lg border bg-muted px-3 flex items-center text-sm text-muted-foreground">
+                    Cargando departamento…
+                  </div>
+                ) : tenantApartment ? (
+                  <div className="min-h-9 rounded-lg border bg-muted px-3 flex items-center text-sm text-muted-foreground">
+                    {tenantApartment.building?.name ?? "Edificio"} - {tenantApartment.unitNumber}
+                    {tenantApartment.floor ? ` (Piso ${tenantApartment.floor})` : ""}
+                  </div>
+                ) : (
+                  <p className="text-xs text-destructive">No se encontró un departamento asignado</p>
+                )}
+                {errors.apartmentId && (
+                  <p className="text-xs text-destructive">{errors.apartmentId.message}</p>
+                )}
+              </>
+            ) : canAccessApartments ? (
               <>
                 <Select
                   value={watch("apartmentId")}
@@ -217,8 +260,8 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creando…" : "Crear ticket"}
+            <Button type="submit" disabled={isSubmitting || tenantAptLoading || createMutation.isPending}>
+              {isSubmitting || createMutation.isPending ? "Creando…" : tenantAptLoading ? "Cargando departamento…" : "Crear ticket"}
             </Button>
           </DialogFooter>
         </form>

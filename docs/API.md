@@ -101,6 +101,7 @@ Todas las rutas requieren autenticación **y** rol ADMIN.
 |--------|------|-------|------|-----------|
 | GET | `/api/tenants` | ADMIN, MANAGER | Query: `page?`, `limit?`, `search?` (busca en nombre, email) | Lista paginada |
 | GET | `/api/tenants/:id` | ADMIN, MANAGER, OWNER, TENANT | — | Tenant por ID |
+| GET | `/api/tenants/:id/apartment` | ADMIN, MANAGER, OWNER, TENANT | — | Departamento asignado al tenant (incluye building y consortium) |
 | GET | `/api/tenants/:id/contract-status` | ADMIN, MANAGER, OWNER, TENANT | — | Estado del contrato |
 | POST | `/api/tenants` | ADMIN | `{ userId, leaseStart?, leaseEnd?, depositAmount?, notes? }` | Creado |
 | PUT | `/api/tenants/:id` | ADMIN | `{ leaseStart?, leaseEnd?, ... }` | Actualizado |
