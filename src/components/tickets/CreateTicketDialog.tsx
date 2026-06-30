@@ -14,7 +14,7 @@ import { useManagers, type Manager } from "@/hooks/useManagers"
 import { useState, useEffect } from "react"
 
 const createTicketSchema = z.object({
-  apartmentId: z.string().min(1, "El departamento es requerido"),
+  apartmentId: z.string().optional().default(""),
   title: z.string().min(1, "El título es requerido").max(200, "Máximo 200 caracteres"),
   description: z.string().min(1, "La descripción es requerida"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
@@ -89,9 +89,9 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
       })
       setServerError(null)
     }
-  }, [open, reset])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
-  // Auto-select the tenant's single apartment when data loads
   useEffect(() => {
     if (isTenant && tenantApartment) {
       setValue("apartmentId", tenantApartment.id, { shouldValidate: true })
@@ -100,9 +100,14 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
 
   const onSubmit = async (data: CreateTicketFormData) => {
     setServerError(null)
+    const apartmentId = isTenant && tenantApartment ? tenantApartment.id : data.apartmentId
+    if (!apartmentId) {
+      setServerError("El departamento es requerido")
+      return
+    }
     try {
       await createMutation.mutateAsync({
-        apartmentId: data.apartmentId,
+        apartmentId,
         title: data.title,
         description: data.description,
         priority: data.priority,
@@ -141,12 +146,15 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
                     Cargando departamento…
                   </div>
                 ) : tenantApartment ? (
-                  <div className="h-9 rounded-lg border bg-muted px-3 flex items-center text-sm text-muted-foreground">
+                  <div className="min-h-9 rounded-lg border bg-muted px-3 flex items-center text-sm text-muted-foreground">
                     {tenantApartment.building?.name ?? "Edificio"} - {tenantApartment.unitNumber}
                     {tenantApartment.floor ? ` (Piso ${tenantApartment.floor})` : ""}
                   </div>
                 ) : (
                   <p className="text-xs text-destructive">No se encontró un departamento asignado</p>
+                )}
+                {errors.apartmentId && (
+                  <p className="text-xs text-destructive">{errors.apartmentId.message}</p>
                 )}
               </>
             ) : canAccessApartments ? (
@@ -252,8 +260,8 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creando…" : "Crear ticket"}
+            <Button type="submit" disabled={isSubmitting || tenantAptLoading || createMutation.isPending}>
+              {isSubmitting || createMutation.isPending ? "Creando…" : tenantAptLoading ? "Cargando departamento…" : "Crear ticket"}
             </Button>
           </DialogFooter>
         </form>
