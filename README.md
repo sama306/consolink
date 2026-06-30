@@ -12,8 +12,6 @@ Plataforma centralizada para administrar consorcios, edificios, departamentos, p
 
 ## Demo visual
 
-_(Las capturas se agregarán a medida que se tomen. Los nombres de archivo sugeridos están listos en `docs/screenshots/`.)_
-
 ### Login
 
 | Vista previa |
