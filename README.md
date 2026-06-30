@@ -163,4 +163,4 @@ Para quien quiera profundizar en el diseño técnico completo:
 ## Autor
 
 Proyecto personal de práctica y aprendizaje.  
-_(Completar con nombre / contacto / LinkedIn)_
+_(Dante Valentin Samacoits)_
