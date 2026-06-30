@@ -1,6 +1,8 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { useQuery } from "@tanstack/react-query"
+import { get } from "@/lib/browser-api-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -34,10 +36,21 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
   const isOwner = userRoles.includes("OWNER")
   const isAdminManager = userRoles.includes("ADMIN") || userRoles.includes("MANAGER")
 
+  const isTenant = userRoles.includes("TENANT")
+
   const { data: apartmentsData, isLoading: apartmentsLoading, error: apartmentsError } =
     isOwner && ownerId
       ? useOwnerApartments(ownerId)
-      : useApartments({ limit: 200 })
+      : isTenant
+        ? { data: undefined, isLoading: false, error: null }
+        : useApartments({ limit: 200 })
+
+  const { data: tenantApartment, isLoading: tenantAptLoading } = useQuery({
+    queryKey: ["tenant-apartment-form", tenantId],
+    queryFn: () => get<{ status: string; data: any }>(`/tenants/${tenantId}/apartment`),
+    select: (res) => res.data,
+    enabled: !!tenantId && isTenant,
+  })
 
   const { data: managersData, isLoading: managersLoading } = useManagers({ limit: 100 })
 
@@ -78,6 +91,13 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
     }
   }, [open, reset])
 
+  // Auto-select the tenant's single apartment when data loads
+  useEffect(() => {
+    if (isTenant && tenantApartment) {
+      setValue("apartmentId", tenantApartment.id, { shouldValidate: true })
+    }
+  }, [isTenant, tenantApartment, setValue])
+
   const onSubmit = async (data: CreateTicketFormData) => {
     setServerError(null)
     try {
@@ -114,7 +134,22 @@ export default function CreateTicketDialog({ open, onOpenChange, userRoles, owne
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="apartmentId">Departamento</Label>
-            {canAccessApartments ? (
+            {isTenant ? (
+              <>
+                {tenantAptLoading ? (
+                  <div className="h-9 rounded-lg border bg-muted px-3 flex items-center text-sm text-muted-foreground">
+                    Cargando departamento…
+                  </div>
+                ) : tenantApartment ? (
+                  <div className="h-9 rounded-lg border bg-muted px-3 flex items-center text-sm text-muted-foreground">
+                    {tenantApartment.building?.name ?? "Edificio"} - {tenantApartment.unitNumber}
+                    {tenantApartment.floor ? ` (Piso ${tenantApartment.floor})` : ""}
+                  </div>
+                ) : (
+                  <p className="text-xs text-destructive">No se encontró un departamento asignado</p>
+                )}
+              </>
+            ) : canAccessApartments ? (
               <>
                 <Select
                   value={watch("apartmentId")}
